@@ -1,0 +1,43 @@
+<Project>
+
+  <!--
+    One source of truth for the client version: the VERSION file next to this one. It lives in a
+    plain text file rather than a csproj property so `publish.sh` can bump it with `sed` and the
+    release tag, the exe, and the Ping all quote the same number.
+
+    AssemblyVersion/FileVersion take the bare `X.Y.Z` (Windows accepts nothing else). The full
+    string — suffix included — goes into InformationalVersion, which is what the client reports and
+    what the server reads back out of the uploaded exe's ProductVersion resource.
+  -->
+  <PropertyGroup>
+    <_VersionRaw>$([System.IO.File]::ReadAllText('$(MSBuildThisFileDirectory)VERSION'))</_VersionRaw>
+    <!-- Overridable so a test build can be stamped 'X.Y.Z-test.<fingerprint>' without writing to
+         VERSION: a test build must not leave the release version pointing at a tree nothing was
+         ever tagged from. See the test flag in publish.sh. -->
+    <BaseVersion Condition="'$(BaseVersion)' == ''">$(_VersionRaw.Trim())</BaseVersion>
+    <Version>$(BaseVersion)</Version>
+
+    <!-- build.sh passes -p:BuildMetadata=dev.<git-sha>; publish.sh leaves it empty. SemVer build
+         metadata ('+'), not a prerelease tag ('-'), because this is the same release plus a way to
+         tell scratch builds apart — and the server refuses to ship anything carrying it. -->
+    <InformationalVersion Condition="'$(BuildMetadata)' != ''">$(BaseVersion)+$(BuildMetadata)</InformationalVersion>
+    <InformationalVersion Condition="'$(BuildMetadata)' == ''">$(BaseVersion)</InformationalVersion>
+
+    <!-- The SDK otherwise appends its own '+<sha>' to InformationalVersion and we lose control of
+         the exact string the server parses. -->
+    <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
+
+    <!-- What Windows shows on right-click -> Properties -> Details, and what the exe says about
+         itself when nobody is asking this project any questions. Product is set explicitly because
+         MSBuild would otherwise derive it from AssemblyName and call it "DigitalAid".
+         Company/Copyright are siblings of ProductVersion in the PE's StringFileInfo and do not
+         disturb it — server/src/pe-version.js reads that key and must keep finding it. -->
+    <Product>Digital Aid</Product>
+    <Company>Boldizsár Bednárik</Company>
+    <Authors>Boldizsár Bednárik</Authors>
+    <Copyright>Copyright © 2026 Boldizsár Bednárik</Copyright>
+    <PackageProjectUrl>https://github.com/bboldi/b2.digital_aid</PackageProjectUrl>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+  </PropertyGroup>
+
+</Project>

@@ -1,0 +1,179 @@
+<header class="page-heading">
+  <p class="eyebrow"><%= t('nav.codes') %></p>
+  <h1><%= t('coupons.title') %></h1>
+  <p class="lead"><%= t('coupons.lead') %></p>
+</header>
+
+<% if (error) { %><p class="error" role="alert"><%= error %></p><% } %>
+<% if (ok) { %><p class="ok" role="status"><%= ok %></p><% } %>
+
+<article>
+  <h2><%= t('coupons.add') %></h2>
+  <form method="post" action="/coupons" class="coupon-mint">
+    <label><%= t('coupons.scope') %>
+      <select name="scope">
+        <option value="global"><%= t('coupons.scopeGlobal') %></option>
+        <% for (const c of clients) { %><option value="<%= c.id %>"><%= c.name %></option><% } %>
+      </select>
+    </label>
+    <label><%= t('coupons.minutes') %>
+      <input type="number" name="minutes" min="1" max="999" value="30" required>
+    </label>
+    <label><%= t('coupons.expiry') %>
+      <input type="date" name="expires" min="<%= today %>" style="min-width: 140px;">
+    </label>
+    <button type="button" class="quiet clear-expiry"><%= t('coupons.expiryNone') %></button>
+    <label><%= t('coupons.count') %>
+      <input type="number" name="count" min="1" max="<%= maxCount %>" value="1" required>
+    </label>
+    <button class="mint-action"><%= t('coupons.mint') %></button>
+  </form>
+</article>
+
+<article class="data-card">
+  <%# The filters must survive an empty result: hiding them leaves no in-page way back to "All".
+      Only a genuinely empty inventory — nothing minted, nothing filtered — gets the bare message. %>
+  <% const filtered = pagination.status !== 'all' || pagination.clientId !== 'all'; %>
+  <% if (coupons.length === 0 && !filtered) { %>
+    <p class="muted"><%= t('coupons.empty') %></p>
+  <% } else { %>
+    <%# Select-all lives here, not in <thead>: the phone stylesheet clips the table header away,
+        and the phone is the primary control surface (ADR-0016). One control on every width. %>
+    <div class="data-toolbar">
+      <label class="select-all-control">
+        <input type="checkbox" id="select-all" <%= coupons.length === 0 ? 'disabled' : '' %>>
+        <span><%= t('coupons.selectAll') %></span>
+      </label>
+      <span class="muted" id="selected-count" data-template="<%= t('coupons.selectedCount') %>"><%= t('coupons.selectedCount', [0]) %></span>
+      <button form="coupon-form" formaction="/coupons/print" disabled formmethod="get" formtarget="_blank" class="quiet">
+        <%= t('coupons.print') %></button>
+      <button form="coupon-form" formaction="/coupons/delete" disabled formmethod="post" class="danger"
+              onclick="return confirm(<%= JSON.stringify(t('coupons.deleteConfirm')) %>)">
+        <%= t('coupons.delete') %></button>
+    </div>
+
+    <form method="get" action="/coupons" class="inline-row" style="margin-bottom: 1rem; justify-content: flex-start;">
+      <select name="client_id" onchange="this.form.submit()">
+        <option value="all" <%= pagination.clientId === 'all' ? 'selected' : '' %>><%= t('coupons.filterAll') %></option>
+        <option value="global" <%= pagination.clientId === 'global' ? 'selected' : '' %>><%= t('coupons.scopeGlobal') %></option>
+        <% for (const c of clients) { %>
+          <option value="<%= c.id %>" <%= pagination.clientId === String(c.id) ? 'selected' : '' %>><%= c.name %></option>
+        <% } %>
+      </select>
+      <select name="status" onchange="this.form.submit()">
+        <option value="all" <%= pagination.status === 'all' ? 'selected' : '' %>><%= t('coupons.filterAll') %></option>
+        <option value="unused" <%= pagination.status === 'unused' ? 'selected' : '' %>><%= t('coupons.filterUnused') %></option>
+        <option value="used" <%= pagination.status === 'used' ? 'selected' : '' %>><%= t('coupons.filterUsed') %></option>
+        <option value="expired" <%= pagination.status === 'expired' ? 'selected' : '' %>><%= t('coupons.filterExpired') %></option>
+      </select>
+      <select name="sort" onchange="this.form.submit()">
+        <option value="newer" <%= pagination.sort === 'newer' ? 'selected' : '' %>><%= t('coupons.sortNewer') %></option>
+        <option value="older" <%= pagination.sort === 'older' ? 'selected' : '' %>><%= t('coupons.sortOlder') %></option>
+      </select>
+    </form>
+
+    <form id="coupon-form">
+      <% if (coupons.length === 0) { %>
+        <p class="muted"><%= t('coupons.noMatches') %></p>
+      <% } else { %>
+        <table class="responsive-table">
+          <thead><tr>
+            <th></th><th><%= t('coupons.code') %></th>
+            <th><%= t('coupons.minutes') %></th><th><%= t('coupons.scope') %></th>
+            <th><%= t('coupons.created') %></th><th><%= t('coupons.expiry') %></th><th class="center-align"><%= t('coupons.state') %></th><th></th>
+          </tr></thead>
+          <tbody>
+          <% for (const c of coupons) { %>
+            <tr>
+              <td class="row-select"><label class="row-select-hit"><input type="checkbox" name="id" value="<%= c.id %>"><span class="sr-only"><%= t('coupons.selectRow') %></span></label></td>
+              <td data-label="<%= t('coupons.code') %>" class="code-cell"><%= grouped(c.code) %></td>
+              <td data-label="<%= t('coupons.minutes') %>"><%= c.minutes %></td>
+              <td data-label="<%= t('coupons.scope') %>"><%= c.client_id === null ? t('coupons.scopeGlobal') : (c.client_name ?? '—') %></td>
+              <td data-label="<%= t('coupons.created') %>"><%= c.created_at.slice(0, 10) %></td>
+              <td data-label="<%= t('coupons.expiry') %>"><%= c.expires_on ?? t('coupons.expiryNone') %></td>
+              <td data-label="<%= t('coupons.state') %>" class="center-align"><%
+                if (c.used_at) { const label = t('coupons.stateUsed', [c.used_by_name ?? '—', c.used_at.slice(0, 16).replace('T', ' ')]); %><svg class="state-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" role="img" aria-label="<%= label %>"><circle cx="12" cy="12" r="9"/><path d="m8 12 2.5 2.5L16 9"/></svg><% }
+                else if (c.expires_on && c.expires_on < today) { %><svg class="state-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" role="img" aria-label="<%= t('coupons.stateExpired') %>"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2M5 5l14 14"/></svg><% }
+                else { %><svg class="state-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" role="img" aria-label="<%= t('coupons.stateUnused') %>"><circle cx="12" cy="12" r="8"/></svg><% } %></td>
+              <td class="row-action"><button type="button" class="quiet copy-code" data-code="<%= c.code %>"
+                          data-copied="<%= t('coupons.copied') %>"><%= t('coupons.copy') %></button></td>
+            </tr>
+          <% } %>
+          </tbody>
+        </table>
+
+        <% if (pagination.pages > 1) { %>
+          <div class="inline-row" style="margin-top: 1rem; justify-content: center; align-items: center;">
+            <% if (pagination.page > 1) { %>
+              <button formaction="/coupons" formmethod="get" name="page" value="<%= pagination.page - 1 %>" class="quiet">
+                <span aria-hidden="true">←</span><span class="sr-only"><%= t('coupons.previousPage') %></span>
+              </button>
+            <% } else { %>
+              <button type="button" class="quiet" disabled><span aria-hidden="true">←</span><span class="sr-only"><%= t('coupons.previousPage') %></span></button>
+            <% } %>
+            
+            <input type="hidden" name="status" value="<%= pagination.status %>">
+            <input type="hidden" name="sort" value="<%= pagination.sort %>">
+            <input type="hidden" name="client_id" value="<%= pagination.clientId %>">
+            
+            <span class="muted"><%= t('coupons.page') %> <%= pagination.page %> <%= t('coupons.ofPages', [pagination.pages]) %></span>
+            
+            <% if (pagination.page < pagination.pages) { %>
+              <button formaction="/coupons" formmethod="get" name="page" value="<%= pagination.page + 1 %>" class="quiet">
+                <span aria-hidden="true">→</span><span class="sr-only"><%= t('coupons.nextPage') %></span>
+              </button>
+            <% } else { %>
+              <button type="button" class="quiet" disabled><span aria-hidden="true">→</span><span class="sr-only"><%= t('coupons.nextPage') %></span></button>
+            <% } %>
+          </div>
+        <% } %>
+      <% } %>
+    </form>
+  <% } %>
+</article>
+
+<%# The clipboard carries the bare code, never the dashes (ADR-0014): a coupon pasted from a
+    messaging app must parse on a Client that has not been updated to tolerate separators. %>
+<script>
+  for (const btn of document.querySelectorAll('.copy-code')) {
+    btn.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(btn.dataset.code);
+        const was = btn.textContent;
+        btn.textContent = btn.dataset.copied;
+        setTimeout(() => { btn.textContent = was; }, 1500);
+      } catch { /* an http origin without clipboard access: the code is on screen to select */ }
+    });
+  }
+
+  const clearExpiry = document.querySelector('.clear-expiry');
+  if (clearExpiry) {
+    clearExpiry.addEventListener('click', () => {
+      const input = document.querySelector('input[name="expires"]');
+      if (input) { input.value = ''; input.focus(); }
+    });
+  }
+
+  const selectAll = document.getElementById('select-all');
+  if (selectAll) {
+    const checkboxes = Array.from(document.querySelectorAll('#coupon-form input[type="checkbox"][name="id"]'));
+    // Print and Delete sit outside the form; the pagination buttons inside it have no form= and
+    // stay out of this list on purpose — paging with nothing selected is fine.
+    const bulk = Array.from(document.querySelectorAll('button[form="coupon-form"]'));
+    const counter = document.getElementById('selected-count');
+
+    const refresh = () => {
+      const n = checkboxes.filter((cb) => cb.checked).length;
+      selectAll.checked = checkboxes.length > 0 && n === checkboxes.length;
+      for (const b of bulk) b.disabled = n === 0;
+      if (counter) counter.textContent = counter.dataset.template.replace('{0}', n);
+    };
+
+    selectAll.addEventListener('change', () => {
+      for (const cb of checkboxes) cb.checked = selectAll.checked;
+      refresh();
+    });
+    for (const cb of checkboxes) cb.addEventListener('change', refresh);
+    refresh();
+  }
+</script>

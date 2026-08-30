@@ -1,0 +1,37 @@
+<header class="page-heading">
+  <p class="eyebrow"><a href="/clients/<%= client.id %>"><%= t('logs.back', [client.name]) %></a></p>
+  <h1><%= t('logs.title', [client.name]) %></h1>
+  <p class="lead"><%= t('logs.lead') %></p>
+</header>
+
+<div class="seg-tabs">
+  <a href="/clients/<%= client.id %>/logs?tab=pings" class="<%= tab === 'pings' ? 'on' : '' %>"><%= t('logs.tabPings') %></a>
+  <a href="/clients/<%= client.id %>/logs?tab=events" class="<%= tab === 'events' ? 'on' : '' %>"><%= t('logs.tabEvents') %></a>
+</div>
+
+<article class="data-card">
+  <p><small><%= t(tab === 'pings' ? 'logs.countPings' : 'logs.countEvents', [total.toLocaleString(), page, pages]) %></small></p>
+  <div class="scroll-x">
+  <% if (tab === 'pings') { %>
+    <table>
+      <tr><th><%= t('logs.colServerTime') %></th><th><%= t('logs.colStatus') %></th><th><%= t('logs.colTimeLeft') %></th><th><%= t('logs.colApp') %></th></tr>
+      <% for (const p of rows) { %>
+      <tr><td><%= p.ts_local ?? p.ts %></td><td><%= v('status', p.status) %></td><td><%= p.remaining_minutes ?? '–' %></td><td><%= p.foreground_app ?? '–' %></td></tr>
+      <% } %>
+    </table>
+  <% } else { %>
+    <table>
+      <tr><th><%= t('logs.colClientTime') %></th><th><%= t('logs.colReceived') %></th><th><%= t('logs.colSeq') %></th><th><%= t('logs.colType') %></th><th><%= t('logs.colPayload') %></th></tr>
+      <% for (const e of rows) { %>
+      <tr><td><%= e.client_ts %></td><td><%= e.received_local ?? e.received_at %></td><td><%= e.seq ?? '–' %></td><td><%= v('event', e.type) %></td><td class="mono"><%= e.payload ?? '' %></td></tr>
+      <% } %>
+    </table>
+  <% } %>
+  </div>
+  <% if (!rows.length) { %><p><small><%= t('logs.empty') %></small></p><% } %>
+
+  <div class="pager">
+    <% if (page > 1) { %><a href="?tab=<%= tab %>&page=<%= page-1 %>"><%= t('logs.newer') %></a><% } %>
+    <% if (page < pages) { %><a href="?tab=<%= tab %>&page=<%= page+1 %>"><%= t('logs.older') %></a><% } %>
+  </div>
+</article>

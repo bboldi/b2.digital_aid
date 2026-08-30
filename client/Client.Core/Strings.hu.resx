@@ -1,0 +1,489 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="AppName" xml:space="preserve">
+    <value>Digital Aid</value>
+  </data>
+  <data name="Close" xml:space="preserve">
+    <value>Bezárás</value>
+  </data>
+  <data name="Continue" xml:space="preserve">
+    <value>Tovább</value>
+  </data>
+  <data name="NeverMind" xml:space="preserve">
+    <value>Mégsem</value>
+  </data>
+  <data name="AskForMoreTime" xml:space="preserve">
+    <value>Kérek több időt</value>
+  </data>
+  <data name="TrayTimeLeft" xml:space="preserve">
+    <value>Hátralévő idő…</value>
+  </data>
+  <data name="TrayAskForTime" xml:space="preserve">
+    <value>Kérek több időt…</value>
+  </data>
+  <data name="TrayEnterCode" xml:space="preserve">
+    <value>Extra idő kód megadása…</value>
+  </data>
+  <data name="TrayLockScreen" xml:space="preserve">
+    <value>Képernyő zárolása</value>
+  </data>
+  <data name="TrayReconnect" xml:space="preserve">
+    <value>Újracsatlakozás most</value>
+  </data>
+  <data name="TrayReconnectTrying" xml:space="preserve">
+    <value>Újracsatlakozás most (próbálkozik…)</value>
+  </data>
+  <data name="TrayReconnectInSec" xml:space="preserve">
+    <value>Újracsatlakozás most (következő próba {0} mp múlva)</value>
+  </data>
+  <data name="TrayReconnectInMin" xml:space="preserve">
+    <value>Újracsatlakozás most (következő próba {0} perc múlva)</value>
+  </data>
+  <data name="TrayConnected" xml:space="preserve">
+    <value>Csatlakozva</value>
+  </data>
+  <data name="TrayPair" xml:space="preserve">
+    <value>Párosítás szerverrel…</value>
+  </data>
+  <data name="TrayExit" xml:space="preserve">
+    <value>Védelem kikapcsolása…</value>
+  </data>
+  <data name="TrayAbout" xml:space="preserve">
+    <value>A Digital Aid névjegye…</value>
+  </data>
+  <data name="TrayLanguage" xml:space="preserve">
+    <value>Nyelv</value>
+  </data>
+  <data name="LanguageEnglish" xml:space="preserve">
+    <value>English</value>
+  </data>
+  <data name="LanguageHungarian" xml:space="preserve">
+    <value>Magyar</value>
+  </data>
+  <data name="StatusNotSetUp" xml:space="preserve">
+    <value>nincs beállítva</value>
+  </data>
+  <data name="StatusScreenLocked" xml:space="preserve">
+    <value>képernyő zárolva</value>
+  </data>
+  <data name="StatusOutOfTime" xml:space="preserve">
+    <value>elfogyott az idő</value>
+  </data>
+  <data name="StatusDowntime" xml:space="preserve">
+    <value>pihenőidő</value>
+  </data>
+  <data name="StatusLockedByParent" xml:space="preserve">
+    <value>szülő zárolta</value>
+  </data>
+  <data name="StatusExtraTime" xml:space="preserve">
+    <value>extra idő, {0} perc</value>
+  </data>
+  <data name="StatusMinutesLeft" xml:space="preserve">
+    <value>{0} perc van hátra</value>
+  </data>
+  <data name="StatusOffline" xml:space="preserve">
+    <value> (offline)</value>
+  </data>
+  <data name="StatusDisconnected" xml:space="preserve">
+    <value> (a szülő lecsatlakoztatta)</value>
+  </data>
+  <data name="TrayTooltip" xml:space="preserve">
+    <value>Digital Aid — {0}{1}</value>
+  </data>
+  <data name="Warn15Left" xml:space="preserve">
+    <value>Kevesebb mint 15 perc van hátra</value>
+  </data>
+  <data name="Warn15Downtime" xml:space="preserve">
+    <value>Kevesebb mint 15 perc a pihenőidőig</value>
+  </data>
+  <data name="Warn5Left" xml:space="preserve">
+    <value>Kevesebb mint 5 perc van hátra</value>
+  </data>
+  <data name="Warn5Downtime" xml:space="preserve">
+    <value>Kevesebb mint 5 perc a pihenőidőig</value>
+  </data>
+  <data name="WarnWrapUp" xml:space="preserve">
+    <value>Ideje lassan befejezni.</value>
+  </data>
+  <data name="WarnSaveNow" xml:space="preserve">
+    <value>Mentsd el a játékot vagy a munkádat most.</value>
+  </data>
+  <data name="BlockHeadline" xml:space="preserve">
+    <value>Ideje szünetet tartani</value>
+  </data>
+  <data name="BlockGotCode" xml:space="preserve">
+    <value>Kaptál kódot a szülődtől?</value>
+  </data>
+  <data name="BlockUnlock" xml:space="preserve">
+    <value>Feloldás</value>
+  </data>
+  <data name="BlockShutDown" xml:space="preserve">
+    <value>Leállítás</value>
+  </data>
+  <data name="BlockExitApp" xml:space="preserve">
+    <value>Kilépés az alkalmazásból</value>
+  </data>
+  <data name="BlockReasonDowntime" xml:space="preserve">
+    <value>Pihenőidő van {0}-ig.</value>
+  </data>
+  <data name="BlockReasonLocked" xml:space="preserve">
+    <value>A szülő zárolta. Ő tudja visszakapcsolni — kóddal nem oldható fel.</value>
+  </data>
+  <data name="CodeBad" xml:space="preserve">
+    <value>Ez a kód nem működik. Kérj újat a szülődtől.</value>
+  </data>
+  <data name="CodeAlreadyUsed" xml:space="preserve">
+    <value>Ezt a kódot már felhasználtad — kérj egy újat.</value>
+  </data>
+  <data name="CouponChecking" xml:space="preserve">
+    <value>Kupon ellenőrzése…</value>
+  </data>
+  <data name="CouponGranted" xml:space="preserve">
+    <value>Kupon elfogadva — {0} perc hozzáadva a mai naphoz.</value>
+  </data>
+  <data name="CouponAlreadyUsed" xml:space="preserve">
+    <value>Ezt a kupont már felhasználták.</value>
+  </data>
+  <data name="CouponExpired" xml:space="preserve">
+    <value>Ez a kupon lejárt.</value>
+  </data>
+  <data name="CouponWrongClient" xml:space="preserve">
+    <value>Ez a kupon egy másik géphez tartozik.</value>
+  </data>
+  <data name="CouponInvalid" xml:space="preserve">
+    <value>Ez a kupon nem érvényes.</value>
+  </data>
+  <data name="CouponOffline" xml:space="preserve">
+    <value>A kuponhoz a szerver elérése szükséges — próbáld újra később.</value>
+  </data>
+  <data name="CouponDowntime" xml:space="preserve">
+    <value>Pihenőidő alatt nem váltható be kupon.</value>
+  </data>
+  <data name="ShutDownConfirm" xml:space="preserve">
+    <value>Leállítod ezt a gépet?</value>
+  </data>
+  <data name="FlyoutGrantHeadline" xml:space="preserve">
+    <value>{0} perc extra idő</value>
+  </data>
+  <data name="FlyoutGrantSub" xml:space="preserve">
+    <value>A szülőd extra időt adott.</value>
+  </data>
+  <data name="FlyoutLeftToday" xml:space="preserve">
+    <value>{0} perc van hátra mára</value>
+  </data>
+  <data name="FlyoutDowntime" xml:space="preserve">
+    <value>Pihenőidő</value>
+  </data>
+  <data name="FlyoutDowntimeSub" xml:space="preserve">
+    <value>Vissza {0}-kor.</value>
+  </data>
+  <data name="FlyoutExhausted" xml:space="preserve">
+    <value>Mára elfogyott az idő</value>
+  </data>
+  <data name="FlyoutExhaustedSub" xml:space="preserve">
+    <value>Holnap újraindul.</value>
+  </data>
+  <data name="FlyoutPaused" xml:space="preserve">
+    <value>A szülő szüneteltette</value>
+  </data>
+  <data name="FlyoutPausedSub" xml:space="preserve">
+    <value>Kérd meg, hogy kapcsolja vissza.</value>
+  </data>
+  <data name="FlyoutStepAway" xml:space="preserve">
+    <value>Elmegyek egy kicsit</value>
+  </data>
+  <data name="FlyoutStepAwayHint" xml:space="preserve">
+    <value>Zárolja a képernyőt. Az időd megáll, amíg vissza nem jelentkezel.</value>
+  </data>
+  <data name="FlyoutStepAwayGrant" xml:space="preserve">
+    <value>Zárolja a képernyőt. Az extra idő viszont tovább telik.</value>
+  </data>
+  <data name="FlyoutDowntimeIs" xml:space="preserve">
+    <value>A pihenőidő {0}–{1}.</value>
+  </data>
+  <data name="FlyoutOnline" xml:space="preserve">
+    <value>Csatlakozva a családi szerverhez.</value>
+  </data>
+  <data name="FlyoutRejected" xml:space="preserve">
+    <value>Ezt a gépet lecsatlakoztatták a szerverről. Még a legutóbbi beállításokat használja. A szülő a tálca menüjéből tudja újracsatlakoztatni.</value>
+  </data>
+  <data name="FlyoutNeverReached" xml:space="preserve">
+    <value>Még soha nem érte el a családi szervert — a gyári beállításokat használja.</value>
+  </data>
+  <data name="FlyoutOfflineShort" xml:space="preserve">
+    <value>Offline működik — a korlátok érvényben vannak.</value>
+  </data>
+  <data name="FlyoutOfflineFor" xml:space="preserve">
+    <value>{0} óta offline működik — még az akkori szabályokat használja.</value>
+  </data>
+  <data name="AgoDays" xml:space="preserve">
+    <value>{0} napja</value>
+  </data>
+  <data name="AgoHours" xml:space="preserve">
+    <value>{0} órája</value>
+  </data>
+  <data name="AgoOverAnHour" xml:space="preserve">
+    <value>több mint egy órája</value>
+  </data>
+  <data name="AskTitle" xml:space="preserve">
+    <value>Digital Aid — több idő kérése</value>
+  </data>
+  <data name="AskQuestion" xml:space="preserve">
+    <value>Mennyi extra időt szeretnél kérni?</value>
+  </data>
+  <data name="AskMinutes" xml:space="preserve">
+    <value>{0} perc</value>
+  </data>
+  <data name="AskFootnote" xml:space="preserve">
+    <value>A szülő dönti el, mennyit kapsz — adhat többet vagy kevesebbet is.</value>
+  </data>
+  <data name="AskSent" xml:space="preserve">
+    <value>Elküldve. Várakozás a válaszra…</value>
+  </data>
+  <data name="AskAlreadyOpen" xml:space="preserve">
+    <value>Már kértél — még nem érkezett válasz.</value>
+  </data>
+  <data name="AskCooldown" xml:space="preserve">
+    <value>Nemrég már kértél. {0} perc múlva kérhetsz újra.</value>
+  </data>
+  <data name="AskUnreachable" xml:space="preserve">
+    <value>Nem sikerült elérni a szervert, így senki nem kapta meg a kérést. Próbáld újra kicsit később.</value>
+  </data>
+  <data name="AskApprovedTitle" xml:space="preserve">
+    <value>{0} perc extra idő</value>
+  </data>
+  <data name="AskApprovedBody" xml:space="preserve">
+    <value>A szülőd igent mondott.</value>
+  </data>
+  <data name="AskDeclinedTitle" xml:space="preserve">
+    <value>Most nem</value>
+  </data>
+  <data name="AskDeclinedBody" xml:space="preserve">
+    <value>A szülőd most nemet mondott. Később újra kérhetsz.</value>
+  </data>
+  <data name="ExtraTimeTitle" xml:space="preserve">
+    <value>Extra idő</value>
+  </data>
+  <data name="MessageFromParent" xml:space="preserve">
+    <value>Üzenet a szülődtől</value>
+  </data>
+  <data name="ExtraCodeWindow" xml:space="preserve">
+    <value>Digital Aid — extra idő</value>
+  </data>
+  <data name="ExtraCodePrompt" xml:space="preserve">
+    <value>Írd be a kódot, amit a szülőd felolvasott.</value>
+  </data>
+  <data name="ExtraCodeUse" xml:space="preserve">
+    <value>Kód beváltása</value>
+  </data>
+  <data name="ExitWindowTitle" xml:space="preserve">
+    <value>Digital Aid — védelem kikapcsolása</value>
+  </data>
+  <data name="ExitPrompt" xml:space="preserve">
+    <value>Add meg az adminkódot a Digital Aid leállításához ezen a gépen. Kikapcsolva marad, amíg valaki újra el nem indítja.</value>
+  </data>
+  <data name="ExitButton" xml:space="preserve">
+    <value>Védelem leállítása</value>
+  </data>
+  <data name="RepairWindowTitle" xml:space="preserve">
+    <value>Digital Aid — párosítás másik szerverrel</value>
+  </data>
+  <data name="RepairPrompt" xml:space="preserve">
+    <value>Ez a gép már párosítva van. Add meg az adminkódot, hogy másik szerverre irányítsd — a mai használat és az eddigi előzmények a jelenlegi szerveren maradnak.</value>
+  </data>
+  <data name="AdminCodeHint" xml:space="preserve">
+    <value>Írd be a 6 számjegyet a hitelesítő alkalmazásból.</value>
+  </data>
+  <data name="AdminCodeInvalid" xml:space="preserve">
+    <value>Ez a kód most nem érvényes.</value>
+  </data>
+  <data name="AdminCodeUsed" xml:space="preserve">
+    <value>Ezt a kódot már felhasználták — várj a következőre.</value>
+  </data>
+  <data name="NotSetUpWarning" xml:space="preserve">
+    <value>A Digital Aid nincs beállítva ezen a gépen, így semmit nem korlátoz.</value>
+  </data>
+  <data name="PairWindowTitle" xml:space="preserve">
+    <value>Digital Aid — gép párosítása</value>
+  </data>
+  <data name="PairPrompt" xml:space="preserve">
+    <value>Add meg a szerver teljes címét és az aktuális 6 jegyű kódot.</value>
+  </data>
+  <data name="PairServerAddress" xml:space="preserve">
+    <value>Szerver címe</value>
+  </data>
+  <data name="PairPcName" xml:space="preserve">
+    <value>A gép neve</value>
+  </data>
+  <data name="PairAdminCode" xml:space="preserve">
+    <value>Adminkód (6 számjegy a hitelesítő alkalmazásból)</value>
+  </data>
+  <data name="PairButton" xml:space="preserve">
+    <value>Párosítás</value>
+  </data>
+  <data name="PairInProgress" xml:space="preserve">
+    <value>Párosítás…</value>
+  </data>
+  <data name="PairRejected" xml:space="preserve">
+    <value>A szerver elutasította ezt a kódot. Próbáld az aktuálisat.</value>
+  </data>
+  <data name="PairFailed" xml:space="preserve">
+    <value>Nem sikerült — ellenőrizd, hogy a kód aktuális-e, és próbáld újra.</value>
+  </data>
+  <data name="PairUnreachable" xml:space="preserve">
+    <value>Nem sikerült elérni a szervert: {0}</value>
+  </data>
+  <data name="PairAdoptQuestion" xml:space="preserve">
+    <value>A szerver már ismeri ezt a gépet „{0}” néven ({1}).
+
+Újracsatlakoztatod? Az előzményei, beállításai és neve megmaradnak.
+
+Válaszd a Nem lehetőséget, ha külön, új gépként állítod be.</value>
+  </data>
+  <data name="PairAdoptNeverSeen" xml:space="preserve">
+    <value>még soha nem jelentkezett be</value>
+  </data>
+  <data name="PairAdoptLastSeen" xml:space="preserve">
+    <value>utoljára látva: {0}</value>
+  </data>
+  <data name="AboutTitle" xml:space="preserve">
+    <value>A Digital Aid névjegye</value>
+  </data>
+  <data name="AboutVersion" xml:space="preserve">
+    <value>{0} verzió</value>
+  </data>
+  <data name="AboutVersionUpdated" xml:space="preserve">
+    <value>{0} verzió — most frissült erről: {1}</value>
+  </data>
+  <data name="AboutMadeBy" xml:space="preserve">
+    <value>Készítette: {0} · {1}</value>
+  </data>
+  <data name="AboutOpenSource" xml:space="preserve">
+    <value>Nyílt forráskódú ({0}) · {1}</value>
+  </data>
+  <data name="AboutLabelServer" xml:space="preserve">
+    <value>Szerver</value>
+  </data>
+  <data name="AboutLabelClientId" xml:space="preserve">
+    <value>Gép azonosító</value>
+  </data>
+  <data name="AboutLabelSetup" xml:space="preserve">
+    <value>Beállítás</value>
+  </data>
+  <data name="AboutLabelDisabled" xml:space="preserve">
+    <value>Szüneteltetve</value>
+  </data>
+  <data name="AboutLabelStoodDown" xml:space="preserve">
+    <value>Leállítva</value>
+  </data>
+  <data name="AboutLabelLastSeen" xml:space="preserve">
+    <value>Utoljára elérve</value>
+  </data>
+  <data name="AboutLabelAllowance" xml:space="preserve">
+    <value>Napi keret</value>
+  </data>
+  <data name="AboutLabelDowntime" xml:space="preserve">
+    <value>Pihenőidő</value>
+  </data>
+  <data name="AboutLabelToday" xml:space="preserve">
+    <value>Ma</value>
+  </data>
+  <data name="AboutLabelQueued" xml:space="preserve">
+    <value>Várakozó események</value>
+  </data>
+  <data name="AboutLabelStateFile" xml:space="preserve">
+    <value>Állapotfájl</value>
+  </data>
+  <data name="AboutLabelLogFile" xml:space="preserve">
+    <value>Naplófájl</value>
+  </data>
+  <data name="AboutNotPaired" xml:space="preserve">
+    <value>nincs párosítva</value>
+  </data>
+  <data name="AboutSetupReady" xml:space="preserve">
+    <value>kész</value>
+  </data>
+  <data name="AboutSetupUnconfigured" xml:space="preserve">
+    <value>nincs beállítva — nincs adminkód, így semmit nem korlátoz, és kód nélkül kiléphető</value>
+  </data>
+  <data name="AboutYes" xml:space="preserve">
+    <value>igen</value>
+  </data>
+  <data name="AboutNo" xml:space="preserve">
+    <value>nem</value>
+  </data>
+  <data name="AboutDisabledYes" xml:space="preserve">
+    <value>igen (szüneteltetve — a szerverről kapcsolható vissza)</value>
+  </data>
+  <data name="AboutStoodDownYes" xml:space="preserve">
+    <value>igen — adminkóddal kilépve. Éjfélkor, újraindításkor, vagy kézi indítással ér véget.</value>
+  </data>
+  <data name="AboutNeverReached" xml:space="preserve">
+    <value>még soha nem érte el a szervert</value>
+  </data>
+  <data name="AboutJustNow" xml:space="preserve">
+    <value>épp most</value>
+  </data>
+  <data name="AboutMinutesAgo" xml:space="preserve">
+    <value>{0} perce</value>
+  </data>
+  <data name="AboutHoursAgo" xml:space="preserve">
+    <value>{0} órája</value>
+  </data>
+  <data name="AboutDaysAgo" xml:space="preserve">
+    <value>{0} napja</value>
+  </data>
+  <data name="AboutAllowanceValue" xml:space="preserve">
+    <value>{0} perc hétköznap, {1} perc hétvégén</value>
+  </data>
+  <data name="AboutTodayValue" xml:space="preserve">
+    <value>{0}, {1} perc elhasználva, {2} perc extra maradt</value>
+  </data>
+  <data name="StatusBlocked" xml:space="preserve">
+    <value>zárolva</value>
+  </data>
+  <data name="BlockReasonUsedUp" xml:space="preserve">
+    <value>Mára elfogyott a képernyőidő. Holnap újraindul.</value>
+  </data>
+  <data name="UnconfiguredStop" xml:space="preserve">
+    <value>A Digital Aid nincs beállítva ezen a gépen, így semmit nem korlátoz.
+
+Leállítod? Éjfélig, a következő újraindításig, vagy amíg kézzel el nem indítod, kikapcsolva marad.</value>
+  </data>
+  <data name="StatusDisabled" xml:space="preserve">
+    <value>szüneteltetve</value>
+  </data>
+</root>

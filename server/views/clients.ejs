@@ -1,0 +1,29 @@
+<header class="page-heading">
+  <p class="eyebrow"><%= t('nav.clients') %></p>
+  <h1><%= t('clients.title') %></h1>
+</header>
+
+<% if (clients.length === 0) { %>
+  <article>
+    <p><%= t('clients.none') %></p>
+    <p class="muted"><small><%= t('clients.noneHint') %></small></p>
+    <% if (hasKit) { %>
+      <p><a class="wide" role="button" href="/download"><%= t('clients.downloadFirst') %></a></p>
+    <% } %>
+  </article>
+<% } else { %>
+  <div data-live-src="/clients/grid" data-live-every="5000" aria-live="polite">
+    <%- include('partials/client-cards', { clients, serverProtocol, timeLeftText, timeLeftKind }) %>
+  </div>
+<% } %>
+
+<%
+  // Not inside the live-refreshed div: that fragment re-renders every five seconds, and this is a
+  // link, not a reading. Only when there is a kit — the page it points at is honest about being
+  // empty, but there is no reason to send anyone there to find that out.
+%>
+<% if (hasKit && clients.length) { %>
+  <p class="muted"><small><a href="/download"><%= t('clients.download') %></a></small></p>
+<% } %>
+
+<script type="module" src="<%= asset('/public/live.js') %>"></script>

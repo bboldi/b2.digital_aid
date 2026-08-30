@@ -1,0 +1,17 @@
+<header class="page-heading">
+  <p class="eyebrow"><%= t('nav.requests') %></p>
+  <h1><%= t('requests.title') %></h1>
+  <p class="lead"><%= t('requests.lead') %></p>
+</header>
+
+<%# Slower than the Clients grid: nothing here changes in five seconds, and this region carries the
+    minutes box (live.js will not swap a region that holds focus, so typing is safe either way). %>
+<div data-live-src="/requests/list" data-live-every="15000" aria-live="polite">
+  <%- include('partials/request-list', { open, online, maxAsk }) %>
+</div>
+
+<%# Outside the live region on purpose: the paging cursor is in the URL, and a region refreshed from
+    one fixed address would drag the reader back to the newest page every fifteen seconds. %>
+<%- include('partials/request-history', { history }) %>
+
+<script type="module" src="<%= asset('/public/live.js') %>"></script>

@@ -1,0 +1,33 @@
+<style>
+  @page { size: A4; margin: 12mm; }
+  body { font-family: system-ui, sans-serif; margin: 0; color: #000; background: #fff; }
+  .sheet { display: grid; grid-template-columns: 1fr 1fr; gap: 6mm; }
+  .ticket {
+    border: 1.5px dashed #73798f; border-radius: 6mm; padding: 6mm 5mm;
+    break-inside: avoid; text-align: center;
+  }
+  .ticket .brand { font-size: 10pt; letter-spacing: .08em; text-transform: uppercase; color: #555; }
+  .ticket .code { font-size: 20pt; font-weight: 700; letter-spacing: .06em; margin: 4mm 0; font-variant-numeric: tabular-nums; }
+  .ticket .worth { font-size: 13pt; margin: 0 0 2mm; }
+  .ticket .meta { font-size: 9.5pt; color: #444; margin: 1mm 0 0; }
+  .toolbar { padding: 8px; text-align: center; }
+  .toolbar button { min-height: 42px; padding: 7px 18px; border: 0; border-radius: 999px; background: #5669ed; color: #fff; font: inherit; font-weight: 650; cursor: pointer; }
+  @media print { .toolbar { display: none; } }
+</style>
+
+<div class="toolbar"><button onclick="window.print()"><%= t('coupons.print') %></button></div>
+
+<div class="sheet">
+<% for (const c of coupons) { %>
+  <div class="ticket">
+    <div class="brand">
+      <img src="/public/icons/icon.svg" alt="" width="14" height="14" style="vertical-align: -1px; margin-right: 4px; opacity: 0.8;">
+      Digital Aid — <%= t('print.coupon') %>
+    </div>
+    <div class="code"><%= grouped(c.code) %></div>
+    <p class="worth"><%= t('print.worth', [c.minutes]) %></p>
+    <p class="meta"><%= c.client_id === null ? t('print.anyComputer') : t('print.onlyFor', [c.client_name ?? '—']) %></p>
+    <p class="meta"><%= c.expires_on ? t('print.validThrough', [c.expires_on]) : t('print.noExpiry') %></p>
+  </div>
+<% } %>
+</div>

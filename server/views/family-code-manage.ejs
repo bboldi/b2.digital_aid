@@ -1,0 +1,161 @@
+<%
+  // Deliberately renders no live server data. Every code on this page is filled in by
+  // family-code.js — from a locally held secret on a Trusted Device, or from the server otherwise.
+  // That is what makes the page safe for the service worker to cache: offline it still works, and a
+  // cached copy on a shared phone reveals nothing that was not already on that phone (PRD §5.4).
+%>
+<header class="page-heading codes-heading">
+  <p class="eyebrow"><%= t('nav.codes') %></p>
+  <h1><%= t('title.codes') %></h1>
+  <p class="lead"><%= t('codes.lead') %></p>
+</header>
+
+<% if (error) { %><p class="error" role="alert"><%= error %></p><% } %>
+<% if (ok) { %><p class="ok" role="status"><%= ok %></p><% } %>
+
+<svg class="code-icon-sprite" aria-hidden="true">
+  <symbol id="code-icon-time" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2M19 5l-2 2"/></symbol>
+  <symbol id="code-icon-coupon" viewBox="0 0 24 24"><path d="M4 7h16v4a2 2 0 0 0 0 4v4H4v-4a2 2 0 0 0 0-4V7Z"/><path d="M12 8.5v2M12 13.5v2"/></symbol>
+  <symbol id="code-icon-admin" viewBox="0 0 24 24"><circle cx="8" cy="12" r="4"/><path d="M12 12h9M17 12v3M20 12v2"/></symbol>
+  <symbol id="code-icon-device" viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="3"/><path d="M9 6h6M10 18h4"/></symbol>
+  <symbol id="code-icon-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.5"/></symbol>
+  <symbol id="code-icon-reset" viewBox="0 0 24 24"><path d="M4 7v5h5M5.5 16a8 8 0 1 0 .5-9l-2 2"/></symbol>
+</svg>
+
+<% if (!adminCodeConfirmed) { %>
+  <%# Someone took the skip at setup or after a regeneration (ADR-0010). Standing, not dismissable:
+      the day it matters is the day the server is unreachable, and on that day this page is a cached
+      copy that cannot tell you anything new. %>
+  <article class="warn-note">
+    <p><strong><%= t('codes.unprovenTitle') %></strong> <%= t('codes.unprovenBody') %></p>
+    <p class="muted"><small><%= t('codes.unprovenNote') %></small></p>
+    <form method="post" action="/admin-code/prove" class="inline-row">
+      <input type="text" name="code" inputmode="numeric" autocomplete="one-time-code"
+             maxlength="6" pattern="\d{6}" placeholder="000000" required>
+      <button><%= t('codes.confirmNow') %></button>
+    </form>
+  </article>
+<% } %>
+
+<div id="offline-strip" class="offline-strip" hidden>
+  <span><%= t('codes.offlineStrip') %></span>
+</div>
+
+<div id="no-crypto" class="offline-strip" hidden>
+  <span><%= t('codes.noCrypto') %></span>
+</div>
+
+<div class="codes-grid">
+<article class="code-hero">
+  <div class="code-panel-title"><svg class="code-panel-icon" aria-hidden="true"><use href="#code-icon-time"/></svg><h2><%= t('codes.extraTitle') %> <span class="code-tag code-tag-extra"><%= t('codes.extraTag') %></span></h2></div>
+  <p class="muted"><small><%= t('codes.extraNote') %></small></p>
+
+  <div class="chips" id="presets">
+    <button type="button" data-min="10">10</button>
+    <button type="button" data-min="15">15</button>
+    <button type="button" data-min="30">30</button>
+    <button type="button" data-min="45">45</button>
+    <button type="button" data-min="60">60</button>
+    <input type="number" id="custom" min="1" max="999" placeholder="<%= t('codes.custom') %>" aria-label="<%= t('codes.customLabel') %>">
+  </div>
+
+  <p class="code code-extra" id="grant">–––-–––-–––</p>
+  <%# The number itself carries no clue about what it does, and handing over the wrong one has no undo. %>
+  <p class="grant-says" id="grant-says">–</p>
+
+  <div class="code-row">
+    <button class="quiet" id="copy-grant" type="button"><%= t('codes.copy') %></button>
+    <span class="validity">
+      <svg class="ring" viewBox="0 0 24 24" aria-hidden="true">
+        <circle class="track" cx="12" cy="12" r="9"></circle>
+        <circle class="value" cx="12" cy="12" r="9" id="ring-grant"></circle>
+      </svg>
+      <span id="valid-grant"></span>
+    </span>
+    <span class="copied" id="copied-grant" role="status" hidden></span>
+  </div>
+
+  <p class="muted"><small><%= t('codes.extraOnceNote') %></small></p>
+</article>
+
+<div class="codes-support">
+<article>
+  <div class="code-panel-title"><svg class="code-panel-icon" aria-hidden="true"><use href="#code-icon-coupon"/></svg><h2><%= t('codes.couponsTitle') %></h2></div>
+  <p class="muted"><small><%= t('codes.couponsLead') %></small></p>
+  <a href="/coupons" role="button"><%= t('codes.couponsOpen') %></a>
+</article>
+
+<article>
+  <details class="collapse">
+    <summary><span class="code-panel-title"><svg class="code-panel-icon" aria-hidden="true"><use href="#code-icon-admin"/></svg><h2><%= t('codes.title') %> <span class="code-tag code-tag-admin"><%= t('codes.adminTag') %></span></h2></span></summary>
+    <%# The one panel on this page that needs a warning rather than an explanation: it is read by
+        whoever is answering the phone, not only by the person who set the server up. %>
+    <p class="warn-note"><strong><%= t('codes.adminWarnLead') %></strong>
+       <%- t('codes.adminWarnBody', ['<strong>' + t('codes.adminWarnStop') + '</strong>']) %></p>
+    <p class="muted"><small><%= t('codes.adminNote') %></small></p>
+
+    <p class="code code-admin" id="code">––––––</p>
+    <div class="code-row">
+      <button class="quiet" id="copy-code" type="button"><%= t('codes.copy') %></button>
+      <span class="validity">
+        <svg class="ring" viewBox="0 0 24 24" aria-hidden="true">
+          <circle class="track" cx="12" cy="12" r="9"></circle>
+          <circle class="value" cx="12" cy="12" r="9" id="ring-code"></circle>
+        </svg>
+        <span id="valid-code"></span>
+      </span>
+      <span class="copied" id="copied-code" role="status" hidden></span>
+    </div>
+  </details>
+</article>
+
+<article id="trust-card">
+  <details class="collapse">
+    <summary><span class="code-panel-title"><svg class="code-panel-icon" aria-hidden="true"><use href="#code-icon-device"/></svg><h2><%= t('codes.deviceTitle') %></h2></span></summary>
+
+    <div id="trust-off">
+      <p><%= t('codes.trustOffLead') %></p>
+      <p class="muted"><small><%= t('codes.trustOffNote') %></small></p>
+      <form id="trust-form">
+        <label><%= t('codes.trustPassword') %>
+          <input type="password" id="trust-password" autocomplete="current-password" required>
+        </label>
+        <button type="submit"><%= t('codes.trustSubmit') %></button>
+        <p class="error" id="trust-error" role="alert" hidden></p>
+      </form>
+    </div>
+
+    <div id="trust-on" hidden>
+      <p class="ok" role="status"><%= t('codes.trustedOn') %></p>
+      <button class="quiet" id="untrust" type="button"><%= t('codes.untrust') %></button>
+    </div>
+  </details>
+</article>
+
+<article>
+  <div class="code-panel-title"><svg class="code-panel-icon" aria-hidden="true"><use href="#code-icon-info"/></svg><h2><%= t('codes.whyTitle') %></h2></div>
+  <p><%= t('codes.whyBody1') %></p>
+  <p><%= t('codes.whyBody2') %></p>
+  <p class="muted"><small><%= t('codes.whyNote') %></small></p>
+</article>
+
+<article class="danger-zone">
+  <div class="code-panel-title"><svg class="code-panel-icon" aria-hidden="true"><use href="#code-icon-reset"/></svg><h2><%= t('codes.regenTitle') %></h2></div>
+  <p><%= t('codes.regenBody') %></p>
+  <form method="post" action="/family-code/regenerate" id="regen-form"
+        onsubmit="return confirm(<%= JSON.stringify(t('codes.regenConfirm')) %>)">
+    <button class="danger"><%= t('codes.regenSubmit') %></button>
+  </form>
+</article>
+</div>
+</div>
+
+<%# The strings family-code.js needs. A static asset cannot be rendered by EJS, so the page hands it
+    a catalogue. application/json, not inline JavaScript: these are values, and values in a JSON
+    island cannot turn into code however they are punctuated. %>
+<script type="application/json" id="js-strings"><%- JSON.stringify(Object.fromEntries(
+  ['js.validFor', 'js.grantSays', 'js.offlineTrusted', 'js.offlineUntrusted', 'js.copied',
+   'js.copyFailed', 'js.wrongPassword', 'js.serverUnreachable', 'js.untrustConfirm']
+    .map((k) => [k, t(k)])
+)).replace(/</g, '\\u003c') %></script>
+<script type="module" src="<%= asset('/public/family-code.js') %>"></script>

@@ -1,0 +1,55 @@
+<%
+  // Answered Requests, newest first, under date headings.
+  //
+  // Not a live region and deliberately so: the paging cursor lives in the URL, and live.js replaces a
+  // marked region from one fixed address, so a fragment that refreshed itself would snap the reader
+  // back to today every fifteen seconds. The cost is that a Request answered or lapsed in the last
+  // few seconds shows up here only on the next navigation, which is a page load away.
+  //
+  // Read in date order rather than a day at a time because the repetition is the finding: "she asks
+  // every night at nine" is invisible in any single day (CONTEXT.md: Request).
+  const hhmm = (local) => (local ? String(local).slice(11, 16) : '—');
+  const outcome = (r) => {
+    if (r.state === 'approved') return t('req.given', [r.granted_minutes]);
+    if (r.state === 'declined') return t('req.declined');
+    if (r.state === 'withdrawn') return t('req.withdrawn');
+    // A Request nobody answered is kept on the same footing as one that was refused: that it lapsed
+    // is itself the fact, and which kind of lapse it was is the part worth distinguishing.
+    return r.decided_at ? t('req.lapsedUndelivered') : t('req.lapsedUnanswered');
+  };
+%>
+
+<h2><%= t('req.earlier') %></h2>
+
+<% if (!history.days.length) { %>
+  <p class="muted"><small><%= t('req.noHistory') %></small></p>
+<% } %>
+
+<% for (const day of history.days) { %>
+  <h3 class="day-head"><%= day.date %></h3>
+  <table class="past-requests responsive-table">
+    <tbody>
+    <% for (const r of day.rows) { %>
+      <tr class="s-<%= r.state %>">
+        <td data-label="<%= t('req.clientColumn') %>"><%= r.client_name %></td>
+        <td data-label="<%= t('req.timeColumn') %>" class="muted"><%= hhmm(r.created_local) %></td>
+        <td><%= t('req.asked', [r.asked_minutes]) %></td>
+        <td data-label="<%= t('req.outcomeColumn') %>"><%= outcome(r) %></td>
+      </tr>
+    <% } %>
+    </tbody>
+  </table>
+<% } %>
+
+<%# Ordinary links, not buttons: paging is navigation, so the back button and a bookmarked page both
+    work, and there is no JavaScript in it at all. %>
+<% if (history.newerAfter || history.olderBefore) { %>
+  <nav class="pager">
+    <% if (history.newerAfter) { %>
+      <a href="/requests?after=<%= history.newerAfter %>" rel="prev"><%= t('req.newer') %></a>
+    <% } else { %><span></span><% } %>
+    <% if (history.olderBefore) { %>
+      <a href="/requests?before=<%= history.olderBefore %>" rel="next"><%= t('req.older') %></a>
+    <% } %>
+  </nav>
+<% } %>

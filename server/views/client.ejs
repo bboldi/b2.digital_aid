@@ -1,0 +1,129 @@
+<%
+  // Two live regions, two cadences: the status line is cheap and wants to feel instant; the day card
+  // cannot change faster than the once-a-minute pings that feed it. Neither contains a form —
+  // the Quick actions panel, Settings and Actions below are only ever repainted by a submit, never
+  // by a refresh. Their live-only buttons carry data-online-only instead, so the header's own dot
+  // can flip them as the PC comes and goes (public/live.js).
+  const isToday = day.date === new Date().toLocaleDateString('en-CA');
+%>
+
+<p class="page-back"><a href="/clients">← <%= t('nav.clients') %></a></p>
+
+<div data-live-src="/clients/<%= client.id %>/header" data-live-every="5000" data-live-online aria-live="polite">
+  <%- include('partials/client-header', { client, online, locked, timeLeft, timeLeftKind, serverProtocol }) %>
+</div>
+
+<%# The banner sits here rather than below the day card: it answers the panel underneath it, and a
+    confirmation you have to scroll to find is not a confirmation. %>
+<% if (error) { %><div role="alert"><p class="error"><%= error %></p></div><% } %>
+<% if (ok) { %><div role="status"><p class="ok"><%= ok %></p></div><% } %>
+
+<%- include('partials/quick-actions', { client, online, locked, messageTemplates }) %>
+
+<%# A finished day is finished: re-fetching a frozen SVG every minute is pure waste. %>
+<div <% if (isToday) { %>data-live-src="/clients/<%= client.id %>/day?date=<%= day.date %>" data-live-every="60000"<% } %>>
+  <%- include('partials/client-day', { client, day, events }) %>
+</div>
+
+<svg class="client-icon-sprite" aria-hidden="true">
+  <symbol id="client-icon-background" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="8" cy="9" r="1.5"/><path d="m4 18 5-5 3.5 3.5 2.5-2.5 5 4"/></symbol>
+  <symbol id="client-icon-settings" viewBox="0 0 24 24"><path d="M4 7h10M18 7h2M4 17h2M10 17h10M14 4v6M6 14v6"/></symbol>
+  <symbol id="client-icon-management" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8M12 17v4M16 8l-4 4-2-2"/></symbol>
+  <symbol id="client-icon-report" viewBox="0 0 24 24"><path d="M5 20V10M12 20V4M19 20v-7M3 20h18"/></symbol>
+</svg>
+
+<article>
+  <%# Collapsed by default: the pictures are set once and admired never — the card earns its place
+      on the page without earning a screenful of it. %>
+  <details class="collapse">
+    <summary><span class="client-summary-title"><svg class="client-summary-icon" aria-hidden="true"><use href="#client-icon-background"/></svg><h2><%= t('client.backgroundsTitle') %></h2></span></summary>
+    <p class="muted"><small><%= t('client.backgroundsNote') %></small></p>
+    <div class="bg-slots">
+      <% for (const b of backgrounds) { %>
+        <%- include('partials/background-slot', { scope: client.id, slot: b.slot, own: b.own, resolved: b.resolved }) %>
+      <% } %>
+    </div>
+  </details>
+</article>
+
+<div class="columns client-tools">
+  <article>
+    <details class="collapse">
+      <summary><span class="client-summary-title"><svg class="client-summary-icon" aria-hidden="true"><use href="#client-icon-settings"/></svg><h2><%= t('client.settingsTitle') %></h2></span></summary>
+      <form method="post" action="/clients/<%= client.id %>/settings">
+      <label><%= t('client.downtimeStart') %> <input name="downtime_start" value="<%= settings.downtime_start %>" pattern="\d{2}:\d{2}" required></label>
+      <label><%= t('client.downtimeEnd') %> <input name="downtime_end" value="<%= settings.downtime_end %>" pattern="\d{2}:\d{2}" required></label>
+      <label><%= t('client.weekdayMinutes') %> <input name="weekday_minutes" type="number" min="0" max="1440" value="<%= settings.weekday_minutes %>" required></label>
+      <label><%= t('client.weekendMinutes') %> <input name="weekend_minutes" type="number" min="0" max="1440" value="<%= settings.weekend_minutes %>" required></label>
+      <button><%= t('client.save') %></button>
+      <p class="muted"><small><%= t('client.noDowntimeHint') %></small></p>
+    </form>
+    </details>
+  </article>
+
+  <article class="actions">
+    <details class="collapse">
+      <summary><span class="client-summary-title"><svg class="client-summary-icon" aria-hidden="true"><use href="#client-icon-management"/></svg><h2><%= t('client.managementTitle') %></h2></span></summary>
+    <form method="post" action="/clients/<%= client.id %>/end-today"
+          onsubmit="return confirm(<%= JSON.stringify(t('client.endTodayConfirm')) %>)">
+      <button class="danger" data-online-only <%= online ? '' : 'disabled' %>><%= t('client.endToday') %></button>
+    </form>
+    <hr>
+    <form method="post" action="/clients/<%= client.id %>/adjust">
+      <label><%= t('client.adjustMinutes') %> <input name="minutes" type="number" min="-999" max="999" required></label>
+      <button data-online-only <%= online ? '' : 'disabled' %>><%= t('client.apply') %></button>
+    </form>
+    <hr>
+    <form method="post" action="/clients/<%= client.id %>/rename">
+      <label><%= t('client.rename') %> <input name="name" value="<%= client.name %>" required></label>
+      <button><%= t('client.rename') %></button>
+    </form>
+    <div class="danger-zone-panel">
+    <h3><%= t('client.dangerZone') %></h3>
+    <form method="post" action="/clients/<%= client.id %>/disable"
+          onsubmit="return <%= client.disabled ? 'true' : `confirm(${JSON.stringify(t('client.disableConfirm'))})` %>">
+      <button class="<%= client.disabled ? '' : 'danger' %>" data-online-only <%= online ? '' : 'disabled' %>><%= client.disabled ? t('client.enable') : t('client.disable') %></button>
+      <small class="muted"><%= client.disabled ? t('client.disabledNote') : t('client.disableNote') %></small>
+    </form>
+    <% if (!client.revoked_at) { %>
+    <form method="post" action="/clients/<%= client.id %>/revoke"
+          onsubmit="return confirm(<%= JSON.stringify(t('client.revokeConfirm')) %>)">
+      <button class="danger"><%= t('client.revoke') %></button>
+    </form>
+    <% } %>
+    <form method="post" action="/clients/<%= client.id %>/delete"
+          onsubmit="return confirm(<%= JSON.stringify(t('client.deleteConfirm')) %>)">
+      <button class="danger"><%= t('client.delete') %></button>
+    </form>
+    </div>
+    </details>
+  </article>
+
+  <article>
+    <details class="collapse">
+      <summary><span class="client-summary-title"><svg class="client-summary-icon" aria-hidden="true"><use href="#client-icon-report"/></svg><h2><%= t('client.reportPeriod') %></h2></span></summary>
+      <form method="get" action="/clients/<%= client.id %>/report" target="_blank">
+        <label>
+          <select name="days">
+            <option value="7"><%= t('client.reportDays', [7]) %></option>
+            <option value="30"><%= t('client.reportDays', [30]) %></option>
+            <option value="90"><%= t('client.reportDays', [90]) %></option>
+            <option value="120"><%= t('client.reportDays', [120]) %></option>
+          </select>
+        </label>
+        <button type="submit"><%= t('client.printReport') %></button>
+      </form>
+    </details>
+  </article>
+</div>
+
+<script type="module" src="<%= asset('/public/live.js') %>"></script>
+<script type="module" src="<%= asset('/public/quick-actions.js') %>"></script>
+
+<% if (messageTemplates) { %>
+<datalist id="message-templates-list">
+  <% for (const line of messageTemplates.split('\n').map(l => l.trim()).filter(Boolean)) { %>
+    <option value="<%= line %>"></option>
+  <% } %>
+</datalist>
+<% } %>

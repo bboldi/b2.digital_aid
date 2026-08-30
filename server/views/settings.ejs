@@ -1,0 +1,212 @@
+<header class="page-heading settings-heading">
+  <p class="eyebrow"><%= t('nav.settings') %></p>
+  <h1><%= t('settings.title') %></h1>
+  <p class="lead"><%= t('settings.lead') %></p>
+</header>
+
+<% if (error) { %><p class="error" role="alert"><%= error %></p><% } %>
+<% if (ok) { %><p class="ok" role="status"><%= ok %></p><% } %>
+
+<svg class="settings-icon-sprite" aria-hidden="true">
+  <symbol id="settings-icon-update" viewBox="0 0 24 24"><path d="M12 3v11m0 0 4-4m-4 4-4-4M5 17v3h14v-3"/></symbol>
+  <symbol id="settings-icon-background" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="8" cy="9" r="1.5"/><path d="m4 18 5-5 3.5 3.5 2.5-2.5 5 4"/></symbol>
+  <symbol id="settings-icon-alerts" viewBox="0 0 24 24"><path d="M18 9a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4"/></symbol>
+  <symbol id="settings-icon-message" viewBox="0 0 24 24"><path d="M4 5h16v12H8l-4 4V5Z"/><path d="M8 9h8M8 13h5"/></symbol>
+  <symbol id="settings-icon-password" viewBox="0 0 24 24"><rect x="5" y="10" width="14" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3M12 14v3"/></symbol>
+  <symbol id="settings-icon-sessions" viewBox="0 0 24 24"><rect x="3" y="4" width="14" height="12" rx="2"/><path d="M8 20h12a1 1 0 0 0 1-1V9M7 20h5M9.5 16v4"/></symbol>
+  <symbol id="settings-icon-language" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.5 3.5 5.5 3.5 9S14.5 18.5 12 21M12 3c-2.5 2.5-3.5 5.5-3.5 9s1 6.5 3.5 9"/></symbol>
+</svg>
+
+<div class="bento-grid settings-bento">
+<article class="span-all">
+  <%# Collapsed by default — opened a handful of times a year, when there is a new build in hand.
+      The two evidence tables (who runs what, what was uploaded) live in here with the upload,
+      because the only moment anyone reads them is that same moment. %>
+  <details class="collapse">
+    <summary><span class="settings-summary-title"><svg class="settings-summary-icon" aria-hidden="true"><use href="#settings-icon-update"/></svg><h2><%= t('settings.updateTitle') %></h2></span></summary>
+    <p><%- t('settings.updateLead', ['<span class="mono">DigitalAid.exe</span>', '<span class="mono">.old</span>']) %></p>
+    <p class="muted"><small><%- t('settings.updateNote', ['<span class="mono">build.sh</span>', '<span class="mono">publish.sh</span>']) %></small></p>
+    <form method="post" action="/update" enctype="multipart/form-data">
+      <label><%= t('settings.updateFile') %> <input type="file" name="exe" accept=".exe" required></label>
+      <button><%= t('settings.updateSubmit') %></button>
+    </form>
+
+    <h3><%= t('settings.versionsTitle') %></h3>
+    <% if (versions.length) { %>
+    <table>
+      <thead><tr><th><%= t('settings.colVersion') %></th><th><%= t('settings.colClients') %></th></tr></thead>
+      <tbody>
+        <% for (const v of versions) { %><tr><td><%= v.version %></td><td><%= v.n %></td></tr><% } %>
+      </tbody>
+    </table>
+    <% } else { %><p class="muted"><small><%= t('settings.versionsNone') %></small></p><% } %>
+
+    <h3><%= t('settings.uploadsTitle') %></h3>
+    <% if (updates.length) { %>
+    <table>
+      <thead><tr><th><%= t('settings.colUploaded') %></th><th><%= t('settings.colVersion') %></th><th><%= t('settings.colSize') %></th></tr></thead>
+      <tbody id="updates-history">
+        <% for (const [i, u] of updates.entries()) { %>
+        <tr data-update-row <%= i >= 10 ? 'hidden' : '' %>>
+          <td><%= u.uploaded_at %><%= u === updates[0] ? t('settings.latest') : '' %></td>
+          <td><%= u.version %></td>
+          <td><%= t('settings.kb', [Math.round(u.size / 1024)]) %></td>
+        </tr>
+        <% } %>
+      </tbody>
+    </table>
+    <% if (updates.length > 10) { %>
+      <button type="button" class="quiet updates-more" id="updates-more" data-batch="10"
+              aria-controls="updates-history"><%= t('settings.uploadsMore') %></button>
+    <% } %>
+    <% } else { %><p class="muted"><small><%= t('settings.uploadsNone') %></small></p><% } %>
+  </details>
+</article>
+
+<article class="span-all">
+  <details class="collapse">
+    <summary><span class="settings-summary-title"><svg class="settings-summary-icon" aria-hidden="true"><use href="#settings-icon-background"/></svg><h2><%= t('settings.backgroundsTitle') %></h2></span></summary>
+    <p><%= t('settings.backgroundsLead') %></p>
+    <p class="muted"><small><%= t('settings.backgroundsNote') %></small></p>
+
+    <div class="bg-slots">
+      <% for (const b of backgrounds) { %>
+        <%- include('partials/background-slot', { scope: 'global', slot: b.slot, own: b.row }) %>
+      <% } %>
+    </div>
+  </details>
+</article>
+
+<article class="span-all">
+  <details class="collapse">
+    <summary><span class="settings-summary-title"><svg class="settings-summary-icon" aria-hidden="true"><use href="#settings-icon-alerts"/></svg><h2><%= t('alerts.title') %></h2></span></summary>
+  <p class="muted"><small><%= t('alerts.note') %></small></p>
+
+  <form method="post" action="/alerts/settings">
+    <% for (const a of alerts) { %>
+      <label>
+        <input type="checkbox" name="<%= a.key %>" <%= a.on ? 'checked' : '' %>>
+        <%= t('alerts.' + a.key) %>
+      </label>
+      <p class="muted" style="margin: -0.4rem 0 0.9rem 1.8rem"><small><%= t('alerts.' + a.key + 'Note') %></small></p>
+    <% } %>
+    <button><%= t('client.save') %></button>
+  </form>
+
+  <%# Turning them on is per-browser and cannot be done from another device: the subscription lives
+      in this browser and only this browser can create it. So the switch is here, on whatever you
+      are holding. %>
+  <div id="alerts-device" data-vapid="<%= vapidPublicKey || '' %>">
+    <hr>
+    <button class="quiet" id="alerts-toggle"><%= t('alerts.enableHere') %></button>
+    <button class="quiet" id="alerts-test" hidden><%= t('alerts.test') %></button>
+    <p id="alerts-status" class="muted"><small></small></p>
+  </div>
+
+  <h3><%= t('alerts.devices') %></h3>
+  <% if (!alertDevices.length) { %>
+    <p class="muted"><small><%= t('alerts.noDevices') %></small></p>
+  <% } else { %>
+    <ul class="alert-devices">
+      <% for (const d of alertDevices) { %>
+        <li>
+          <span class="mono"><%= (d.label || d.endpoint).slice(0, 60) %></span>
+          <small class="muted">
+            <%= t('alerts.added', [d.created_at]) %> ·
+            <%= d.last_ok_at ? t('alerts.lastOk', [d.last_ok_at]) : t('alerts.neverUsed') %>
+          </small>
+          <form method="post" action="/alerts/forget" class="inline">
+            <input type="hidden" name="endpoint" value="<%= d.endpoint %>">
+            <button class="quiet"><%= t('alerts.forget') %></button>
+          </form>
+        </li>
+      <% } %>
+    </ul>
+  <% } %>
+  </details>
+</article>
+
+<article class="span-all">
+  <details class="collapse">
+    <summary><span class="settings-summary-title"><svg class="settings-summary-icon" aria-hidden="true"><use href="#settings-icon-message"/></svg><h2><%= t('settings.templatesTitle') %></h2></span></summary>
+    <form method="post" action="/settings/templates">
+      <p class="muted"><small><%= t('settings.templatesLead') %></small></p>
+      <div class="field">
+        <textarea name="message_templates" rows="5" style="width: 100%; box-sizing: border-box;"><%= messageTemplates %></textarea>
+      </div>
+      <button><%= t('client.save') %></button>
+    </form>
+  </details>
+</article>
+
+<article class="span-all">
+  <details class="collapse">
+    <summary><span class="settings-summary-title"><svg class="settings-summary-icon" aria-hidden="true"><use href="#settings-icon-password"/></svg><h2><%= t('settings.passwordTitle') %></h2></span></summary>
+  <form method="post" action="/password">
+    <label><%= t('settings.currentPassword') %> <input name="current" type="password" autocomplete="current-password" required></label>
+    <label><%= t('settings.newPassword') %> <input name="password" type="password" autocomplete="new-password" required></label>
+    <label><%= t('settings.repeatNewPassword') %> <input name="password2" type="password" autocomplete="new-password" required></label>
+    <button><%= t('settings.passwordSubmit') %></button>
+  </form>
+  </details>
+</article>
+
+<article class="span-all">
+  <details class="collapse">
+    <summary><span class="settings-summary-title"><svg class="settings-summary-icon" aria-hidden="true"><use href="#settings-icon-sessions"/></svg><h2><%= t('settings.sessionsTitle') %></h2></span></summary>
+  <p><%= t('settings.sessionsLead') %></p>
+  <div class="inline-row">
+    <form method="post" action="/logout" class="inline"><button class="quiet"><%= t('settings.logout') %></button></form>
+    <form method="post" action="/settings/logout-all" class="inline"
+          onsubmit="return confirm(<%= JSON.stringify(t('settings.logoutAllConfirm')) %>)">
+      <button class="danger"><%= t('settings.logoutAll') %></button>
+    </form>
+  </div>
+  <p class="muted"><small><%= t('settings.sessionsNote') %></small></p>
+  </details>
+</article>
+
+<article class="span-all">
+  <details class="collapse">
+    <summary><span class="settings-summary-title"><svg class="settings-summary-icon" aria-hidden="true"><use href="#settings-icon-language"/></svg><h2><%= t('settings.languageTitle') %></h2></span></summary>
+  <p class="muted"><small><%= t('settings.languageLead') %></small></p>
+  <form method="post" action="/settings/language" class="inline-row">
+    <select name="lang" aria-label="<%= t('settings.languageTitle') %>">
+      <% for (const code of languages) { %>
+        <option value="<%= code %>" <%= code === lang ? 'selected' : '' %>><%= languageNames[code] %></option>
+      <% } %>
+    </select>
+    <button><%= t('settings.languageSubmit') %></button>
+  </form>
+  </details>
+</article>
+
+<article class="always-open span-all">
+  <h2><%= t('settings.aboutTitle') %></h2>
+  <p><strong><%= branding.product %></strong> <span class="mono"><%= version %></span></p>
+  <% if (isDevBuild) { %>
+    <p class="muted"><small><%- t('settings.aboutDevBuild', ['<span class="mono">./publish.sh</span>']) %></small></p>
+  <% } %>
+  <p class="muted"><small><%- t('settings.aboutProtocol', [protocolVersion,
+     '<span class="mono">ADR-0011</span>', '<span class="mono">git pull &amp;&amp; npm install</span>']) %></small></p>
+  <p>
+    <%= t('settings.aboutMadeBy', [branding.author]) %> ·
+    <a href="<%= branding.website %>" rel="noreferrer"><%= branding.website.replace('https://', '') %></a><br>
+    <a href="mailto:<%= branding.email %>"><%= branding.email %></a><br>
+    <%= t('settings.aboutOpenSource', [branding.license]) %> ·
+    <a href="<%= branding.repository %>" rel="noreferrer"><%= branding.repository.replace('https://', '') %></a>
+  </p>
+  <p class="muted"><small><%= branding.copyright %></small></p>
+</article>
+</div>
+
+<%# The strings alert-device.js needs. A static asset cannot be rendered by EJS, so the page hands it a
+    catalogue — application/json rather than inline JavaScript, the same way the Codes page does it:
+    these are values, and values in a JSON island cannot turn into code however they are punctuated. %>
+<script type="application/json" id="alert-strings"><%- JSON.stringify(Object.fromEntries(
+  ['alerts.enableHere', 'alerts.disableHere', 'alerts.on', 'alerts.denied', 'alerts.unsupported',
+   'alerts.testSent']
+    .map((k) => [k, t(k)])
+)).replace(/</g, '\\u003c') %></script>
+<script type="module" src="<%= asset('/public/alert-device.js') %>"></script>
+<script type="module" src="<%= asset('/public/settings-history.js') %>"></script>

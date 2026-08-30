@@ -1,0 +1,32 @@
+<div class="auth-shell">
+<header class="auth-brand">
+  <img src="/public/icons/icon.svg" alt="">
+  <div><p class="eyebrow"><%= t('download.kitTitle') %></p><h1>Digital Aid</h1></div>
+</header>
+<p class="muted"><%= t('download.lead') %></p>
+
+<article>
+  <% if (kit.ok) { %>
+    <h2><%= t('download.kitTitle') %></h2>
+    <p class="muted"><small><%= t('download.version', [kit.version]) %></small></p>
+    <p><a class="wide" role="button" href="/download/install-kit.zip"><%= t('download.button') %></a></p>
+    <p class="muted"><small><%= t('download.contents') %></small></p>
+
+    <h3><%= t('download.nextTitle') %></h3>
+    <ol>
+      <li><%- t('download.step1', ['<span class="mono">winget install Microsoft.DotNet.DesktopRuntime.10</span>']) %></li>
+      <li><%- t('download.step2', ['<span class="mono">Install-DigitalAid.bat</span>']) %></li>
+      <li><%= t('download.step3') %></li>
+    </ol>
+    <p class="muted"><small><%- t('download.blocked', ['<span class="mono">DigitalAid.exe</span>']) %></small></p>
+  <% } else if (kit.reason === 'no-scripts') { %>
+    <h2><%= t('download.unavailableTitle') %></h2>
+    <p><%- t('download.noScripts', ['<span class="mono">client/install/</span>']) %></p>
+  <% } else { %>
+    <h2><%= t('download.unavailableTitle') %></h2>
+    <p><%= t('download.noBuild') %></p>
+  <% } %>
+</article>
+
+<p class="muted"><small><a href="/login"><%= t('download.backToLogin') %></a></small></p>
+</div>

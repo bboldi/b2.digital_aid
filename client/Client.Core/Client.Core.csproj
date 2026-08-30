@@ -1,0 +1,32 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <!-- So the embedded resource is named DigitalAid.Client.Core.Strings, which is what the generated
+         accessor below looks for. Without it the manifest takes the assembly name and the lookup
+         misses at runtime rather than at build time. -->
+    <RootNamespace>DigitalAid.Client.Core</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="Client.Core.Tests" />
+  </ItemGroup>
+
+  <!-- Strongly-typed accessors generated from the neutral catalogue, so a mistyped key is a build
+       error rather than a blank label discovered by a kid. Strings.hu.resx needs no entry: satellite
+       assemblies are picked up by convention. -->
+  <ItemGroup>
+    <EmbeddedResource Update="Strings.resx">
+      <Generator>MSBuild:Compile</Generator>
+      <StronglyTypedFileName>$(IntermediateOutputPath)Strings.Designer.cs</StronglyTypedFileName>
+      <StronglyTypedLanguage>CSharp</StronglyTypedLanguage>
+      <StronglyTypedNamespace>DigitalAid.Client.Core</StronglyTypedNamespace>
+      <StronglyTypedClassName>Strings</StronglyTypedClassName>
+      <!-- Public: the shell in Client.App is the half that actually renders these. -->
+      <PublicClass>true</PublicClass>
+    </EmbeddedResource>
+  </ItemGroup>
+
+</Project>

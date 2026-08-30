@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="<%= req.cookies.lang || 'en' %>">
+<head>
+  <meta charset="utf-8">
+  <title><%= T('report.title', [client.name]) %></title>
+  <style>
+    :root { color-scheme: light dark; --ink:#171a2c; --muted:#63677d; --surface:#eef0f7; --card:#fbfbff; --line:#d5d8e6; --primary:#5669ed; --active:#1f7a4d; --blocked:#b3362a; }
+    * { box-sizing: border-box; }
+    body { font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; line-height: 1.5; color: var(--ink); background: var(--surface); max-width: 960px; margin: 0 auto; padding: 28px; }
+    h1 { font-size: clamp(30px, 6vw, 46px); letter-spacing: -.045em; line-height: 1.05; margin: 0 0 8px; }
+    h2 { font-size: 19px; letter-spacing: -.02em; margin-top: 32px; margin-bottom: 12px; }
+    .summary { display: grid; margin: 24px 0 30px; }
+    .summary-item { position: relative; overflow: hidden; background: #172246; color: #fff; padding: 24px; border-radius: 22px; min-height: 130px; }
+    .summary-item::after { content:""; position:absolute; width:150px; height:150px; right:-55px; bottom:-70px; border:28px solid rgba(255,255,255,.08); border-radius:50%; }
+    .summary-value { font-size: 32px; font-weight: 720; letter-spacing: -.04em; margin-top: 28px; }
+    .summary-label { font-size: 14px; color: var(--muted); }
+    table { width: 100%; border-collapse: collapse; margin-bottom: 30px; }
+    th, td { border: 1px solid var(--line); padding: 8px 12px; text-align: left; }
+    th { background-color: var(--card); font-weight: 650; }
+    .top-apps { list-style-type: none; padding: 18px; margin: 0; border:1px solid var(--line); border-radius:20px; background:var(--card); }
+    .top-apps li { margin-bottom: 12px; }
+    .top-apps li:last-child { margin-bottom:0; }
+    .bar-container { background-color: var(--line); border-radius: 999px; height: 10px; width: 100%; overflow: hidden; margin-top: 6px; }
+    .bar { background-color: var(--primary); height: 100%; border-radius:inherit; }
+    .no-data { font-style: italic; color: var(--muted); }
+    
+    .chart { margin: 20px 0 40px 35px; padding:20px 20px 12px 0; border-radius:20px; background:var(--card); }
+    .chart-bars { display: flex; height: 250px; align-items: flex-end; border-bottom: 1px solid #999; border-left: 1px solid #999; gap: 1px; position: relative; z-index: 1; }
+    .y-grid-line { position: absolute; left: 0; right: 0; border-top: 1px dashed #ddd; z-index: -1; }
+    .y-grid-label { position: absolute; left: -35px; top: -7px; font-size: 11px; color: #666; text-align: right; width: 30px; }
+    .chart-col { flex: 1; display: flex; flex-direction: column; justify-content: flex-end; height: 100%; min-width: 0; position: relative; }
+    .chart-col:hover { opacity: 0.8; }
+    .allowance-line { position: absolute; left: 0; right: 0; border-top: 2px dotted #2196F3; z-index: 2; pointer-events: none; }
+    .bar-used { background-color: var(--active); width: 100%; }
+    .bar-blocked { background-color: var(--blocked); width: 100%; }
+    .chart-labels { display: flex; gap: 1px; margin-top: 5px; height: 40px; }
+    .chart-label-col { flex: 1; text-align: center; min-width: 0; position: relative; }
+    .chart-label-col span { display: block; font-size: 11px; color: #666; transform: rotate(-45deg); transform-origin: top center; white-space: nowrap; margin-top: 5px; }
+    
+    .legend { display: flex; gap: 20px; justify-content: center; margin-bottom: 10px; font-size: 13px; }
+    .legend-item { display: flex; align-items: center; gap: 6px; }
+    .legend-color { width: 12px; height: 12px; border-radius: 2px; }
+    .toolbar { display:flex; justify-content:flex-end; margin-bottom: 20px; }
+    .toolbar button { min-height:44px; padding:8px 18px; border:0; border-radius:999px; background:var(--primary); color:#fff; font:inherit; font-weight:650; cursor:pointer; }
+
+    @media (prefers-color-scheme: dark) {
+      :root { --ink:#f2f2ff; --muted:#b8bbcf; --surface:#10121c; --card:#191c2a; --line:#363a4d; --primary:#b9c1ff; --active:#62c78f; --blocked:#ec7266; }
+      .toolbar button { color:#1d285f; }
+    }
+
+    @media print {
+      .toolbar { display: none; }
+      body { padding: 0; max-width: 100%; }
+      :root { --ink:#171a2c; --muted:#63677d; --surface:#fff; --card:#fff; --line:#d5d8e6; --primary:#5669ed; --active:#1f7a4d; --blocked:#b3362a; }
+      .summary-item { background: #172246 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      th { background-color: #eee !important; -webkit-print-color-adjust: exact; color-adjust: exact; }
+      .bar-used, .bar, .legend-color.bar-used { background-color: var(--active) !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      .bar-blocked, .legend-color.bar-blocked { background-color: var(--blocked) !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      .allowance-line { border-top-color: #2196F3 !important; -webkit-print-color-adjust: exact; color-adjust: exact; }
+    }
+  </style>
+</head>
+<body>
+  <div class="toolbar"><button onclick="window.print()"><%= T('report.print') %></button></div>
+  <h1><%= T('report.title', [client.name]) %></h1>
+  <p><%= T('report.dateRange', [dates[0], dates[dates.length - 1]]) %></p>
+
+  <div class="summary">
+    <div class="summary-item">
+      <div class="summary-value"><%= T('report.average', [averageUsed]) %></div>
+    </div>
+  </div>
+
+  <h2><%= T('report.topApps') %></h2>
+  <% if (topApps.length > 0) { %>
+    <ul class="top-apps">
+      <% topApps.forEach(app => { %>
+        <li>
+          <%= T('report.appUsage', [app.app, app.percent]) %>
+          <div class="bar-container"><div class="bar" style="width: <%= app.percent %>%"></div></div>
+        </li>
+      <% }) %>
+    </ul>
+  <% } else { %>
+    <p class="no-data"><%= T('report.noData') %></p>
+  <% } %>
+
+  <h2><%= T('report.dailyUsage') %></h2>
+  
+  <div class="legend">
+    <div class="legend-item">
+      <div class="legend-color bar-used"></div>
+      <span><%= T('report.used') %></span>
+    </div>
+    <div class="legend-item">
+      <div class="legend-color bar-blocked"></div>
+      <span><%= T('report.blocked') %></span>
+    </div>
+    <div class="legend-item">
+      <div class="legend-color" style="border-top: 2px dotted #5669ed; height: 0; align-self: center;"></div>
+      <span><%= T('report.allowance') %></span>
+    </div>
+  </div>
+
+  <% 
+     let maxMins = Math.max(60, ...dailyStats.map(s => s.used + s.blocked));
+     let interval = 60;
+     if (maxMins > 480) interval = 120;
+     else if (maxMins > 240) interval = 60;
+     else if (maxMins > 120) interval = 30;
+     else interval = 15;
+     
+     const chartMax = Math.ceil(maxMins / interval) * interval;
+  %>
+  <div class="chart">
+    <div class="chart-bars">
+      <% for (let tick = 0; tick <= chartMax; tick += interval) { 
+           const bottomPct = (tick / chartMax) * 100;
+      %>
+         <div class="y-grid-line" style="bottom: <%= bottomPct %>%; <%= tick === 0 ? 'border-top: none;' : '' %>">
+            <div class="y-grid-label"><%= tick %></div>
+         </div>
+      <% } %>
+
+      <% dailyStats.forEach(stat => { 
+         const usedPct = (stat.used / chartMax) * 100;
+         const blockedPct = (stat.blocked / chartMax) * 100;
+         
+         const dateObj = new Date(stat.date + 'T00:00:00'); // parse safely as local date
+         const isWeekend = dateObj.getDay() === 0 || dateObj.getDay() === 6;
+         const allowance = isWeekend ? client.weekend_minutes : client.weekday_minutes;
+         const allowancePct = (allowance / chartMax) * 100;
+      %>
+         <div class="chart-col" title="<%= T('report.chartTitle', [stat.date, stat.used, stat.blocked, allowance]) %>">
+           <div class="allowance-line" style="bottom: <%= allowancePct %>%"></div>
+           <div class="bar-blocked" style="height: <%= blockedPct %>%"></div>
+           <div class="bar-used" style="height: <%= usedPct %>%"></div>
+         </div>
+      <% }) %>
+    </div>
+    <div class="chart-labels">
+      <% dailyStats.forEach((stat, i) => { 
+         const showLabel = days <= 14 ? true : (i % Math.ceil(days / 14) === 0 || i === days - 1);
+      %>
+         <div class="chart-label-col">
+           <% if (showLabel) { %>
+             <span><%= stat.date.substring(5).replace('-', '/') %></span>
+           <% } %>
+         </div>
+      <% }) %>
+    </div>
+  </div>
+
+</body>
+</html>

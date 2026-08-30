@@ -1,0 +1,888 @@
+/* Digital Aid — the layer on top of Beer CSS (Material 3).
+   Beer owns component primitives (buttons, cards, fields); this file owns the theme tokens and
+   everything specific to this app: the shell and navigation, the Clients cards, status colours,
+   Time Left, the day ribbon, the code display. Loaded after beer.min.css so its :root wins.
+
+   Theming: the document gets a resolved light/dark data attribute before the stylesheets paint.
+   With no stored choice that attribute follows prefers-color-scheme; the app-bar switch persists
+   an explicit choice locally. */
+
+:root {
+  color-scheme: light;
+
+  /* Status Bento keeps the product's blue purpose but pushes it slightly violet: status modules
+     read as their own interface rather than a stock Material skin. */
+  --primary: #5669ed;
+  --on-primary: #ffffff;
+  --primary-container: #e3e7ff;
+  --on-primary-container: #26347f;
+  --secondary: #53586f;
+  --secondary-container: #e2e5f2;
+  --on-secondary-container: #262a3d;
+  --surface: #eef0f7;
+  --surface-container-lowest: #fbfbff;
+  --surface-container-low: #f7f8ff;
+  --surface-container: #e9ebf4;
+  --surface-container-high: #e2e5f0;
+  --surface-container-highest: #d9dce8;
+  --on-surface: #171a2c;
+  --on-surface-variant: #63677d;
+  --outline: #74788d;
+  --outline-variant: #d5d8e6;
+  --error: #ba1a1a;
+  --on-error: #ffffff;
+
+  /* Card face — one alias so light and dark can disagree about which layer a card sits on. */
+  --card-bg: #fbfbff;
+  --card-border: var(--outline-variant);
+
+  /* Status colours — the same vocabulary the Client Page timeline uses, so a colour means the
+     same thing wherever it appears. The *-container pairs back chips and tags. */
+  --da-active: #1f7a4d;
+  --da-grant: #2b5cd9;
+  --da-locked: #6d7686;
+  --da-blocked: #b3362a;
+  --da-offline: #6d7686;
+  --da-active-container: #d9efe3;
+  --da-grant-container: #dce1ff;
+  --da-blocked-container: #fbdedb;
+  --da-locked-container: #e5e8ee;
+  --da-off: #e7e8ee;        /* timeline background: PC off / no report */
+  --da-axis: #b8bac4;       /* timeline gridlines and axis text */
+  --da-warn-fg: #a06000;
+  --da-warn-bg: #fff4e0;
+  --da-warn-border: #f0d49a;
+}
+
+:root[data-theme="dark"] {
+    color-scheme: dark;
+    --primary: #b9c1ff;
+    --on-primary: #1d285f;
+    --primary-container: #29305d;
+    --on-primary-container: #e1e5ff;
+    --secondary: #c0c3d8;
+    --secondary-container: #303344;
+    --on-secondary-container: #e4e5f2;
+    --surface: #10121c;
+    --surface-container-lowest: #0c0e17;
+    --surface-container-low: #191c2a;
+    --surface-container: #202332;
+    --surface-container-high: #292d3d;
+    --surface-container-highest: #34384a;
+    --on-surface: #f2f2ff;
+    --on-surface-variant: #b8bbcf;
+    --outline: #8d91a7;
+    --outline-variant: #363a4d;
+    --error: #ffb4ab;
+    --on-error: #690005;
+
+    --card-bg: #191c2a;
+    --card-border: var(--outline-variant);
+
+    --da-active: #62c78f;
+    --da-grant: #9db1f7;
+    --da-locked: #99a2b3;
+    --da-blocked: #ec7266;
+    --da-offline: #99a2b3;
+    --da-active-container: #123b27;
+    /* Muted on purpose: the vivid navy read as a button next to the primary-container pills. */
+    --da-grant-container: #232f4e;
+    --da-blocked-container: #4a1712;
+    --da-locked-container: #272b33;
+    --da-off: #292a30;
+    --da-axis: #55565f;
+    --da-warn-fg: #f0c078;
+    --da-warn-bg: #3a2e18;
+    --da-warn-border: #6b5326;
+}
+
+/* --- Base ----------------------------------------------------------------- */
+
+html, body { font-family: Inter, system-ui, -apple-system, "Segoe UI", sans-serif; }
+body { background: var(--surface); color: var(--on-surface); }
+
+/* Beer turns body:has(>main) into its own app-shell grid and expects its nav/header classes to
+   claim areas; this app draws its own shell, and unclassed children widen that grid instead of
+   flowing. Opt back into normal flow. */
+body:has(> main) { display: block; }
+main.shell { overflow: visible; grid-area: auto; }
+
+/* Beer sizes headings for marketing pages; this is an app. */
+h1 { font-size: clamp(1.9rem, 7vw, 2.8rem); font-weight: 720; letter-spacing: -0.045em; line-height: 1.05; margin: 1.1rem 0 0.6rem; }
+h2 { font-size: 1.15rem; font-weight: 680; letter-spacing: -0.02em; margin: 0 0 0.4rem; }
+h3 { font-size: 1rem; font-weight: 650; margin: 0.8rem 0 0.3rem; }
+h4 { font-size: 0.9rem; font-weight: 600; margin: 0 0 0.15rem; }
+
+/* Beer force-fills SVG with currentColor; the app's inline icons are stroke outlines. */
+svg[stroke] * { fill: none; }
+
+/* Pico shipped this and views rely on it: elements the page JS reveals (the offline strips on the
+   Codes page, the hidden test button) start with the hidden attribute, and a styled display would
+   otherwise override it. */
+[hidden] { display: none !important; }
+.sr-only {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;
+}
+
+.mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; white-space: nowrap; }
+td.mono { white-space: normal; word-break: break-all; }
+.error, .ok {
+  border: 1px solid currentColor; border-radius: 1rem; padding: 0.75rem 0.9rem;
+  font-size: 0.9rem;
+}
+.error { color: var(--da-blocked); background: var(--da-blocked-container); }
+.ok { color: var(--da-active); background: var(--da-active-container); }
+.warn {
+  color: var(--da-warn-fg); background: var(--da-warn-bg);
+  border: 1px solid var(--da-warn-border); border-radius: 0.4rem;
+  padding: 0.05rem 0.4rem; font-size: 0.85em;
+}
+.muted { color: var(--on-surface-variant); }
+
+/* --- Shell and navigation ------------------------------------------------- */
+/* Brand bar on top; one nav that is a thumb-reachable bottom bar on phones (the PWA lives on a
+   phone) and a Material rail on wider screens. Same markup both ways. */
+
+.appbar {
+  display: flex; align-items: center; gap: 0.55rem;
+  padding: 1rem 1.2rem 0; padding-top: max(1rem, env(safe-area-inset-top));
+  background: var(--surface); color: var(--on-surface);
+}
+.appbar .brand {
+  display: flex; align-items: center; gap: 0.55rem;
+  font-size: 1rem; font-weight: 720; letter-spacing: -0.02em; text-decoration: none; color: var(--on-surface);
+}
+.appbar .brand img { width: 1.75rem; height: 1.75rem; display: block; border-radius: 0.55rem; }
+.theme-toggle {
+  margin-left: auto; width: 2.75rem; height: 2.75rem; min-height: 2.75rem; padding: 0;
+  border-radius: 50%; background: var(--surface-container); color: var(--on-surface-variant);
+}
+.theme-toggle svg { width: 1.3rem; height: 1.3rem; stroke-width: 1.8; }
+:root[data-theme="light"] .theme-sun, :root[data-theme="dark"] .theme-moon { display: none; }
+
+main.shell {
+  max-width: 64rem; margin: 0 auto;
+  padding: 0.35rem 1.1rem 6.8rem;
+}
+
+.tabbar {
+  display: flex; position: fixed; inset: auto 0 0 0; z-index: 20;
+  background: color-mix(in srgb, var(--card-bg) 94%, transparent);
+  border-top: 1px solid var(--outline-variant);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+.tabbar a {
+  flex: 1; display: flex; flex-direction: column; align-items: center; gap: 0.2rem;
+  min-height: 4.7rem; padding: 0.65rem 0.25rem 0.75rem;
+  text-decoration: none; color: var(--on-surface-variant); font-size: 0.75rem;
+}
+.tabbar a.on { color: var(--on-surface); font-weight: 550; }
+.tabbar .pill {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 3.5rem; height: 1.85rem; border-radius: 1rem; position: relative;
+}
+.tabbar a.on .pill { background: var(--primary-container); color: var(--on-primary-container); }
+.tabbar .pill svg { width: 1.4rem; height: 1.4rem; }
+
+@media (min-width: 46rem) {
+  .tabbar {
+    inset: 0 auto 0 0; width: 5.75rem; flex-direction: column; justify-content: center;
+    gap: 0.6rem; padding: 0;
+    padding-left: env(safe-area-inset-left);
+  }
+  .tabbar a { flex: 0 0 auto; }
+  .tabbar { border-top: 0; border-right: 1px solid var(--outline-variant); }
+  .appbar { padding-left: 7.25rem; }
+  main.shell { padding-left: 7rem; padding-bottom: 2.5rem; max-width: 71rem; }
+}
+
+/* The Requests count, riding the nav on every page. Filled by a live fragment, and empty (so
+   invisible) when nobody is waiting. */
+.ask-badge:empty { display: none; }
+.ask-badge {
+  position: absolute; top: -0.15rem; right: 0.4rem;
+}
+.ask-badge .tag.ask {
+  background: var(--error); color: var(--on-error); border: none;
+  font-size: 0.62rem; font-weight: 650; font-variant-numeric: tabular-nums;
+  min-width: 1rem; height: 1rem; border-radius: 0.5rem; padding: 0 0.25rem;
+  display: inline-flex; align-items: center; justify-content: center;
+}
+
+/* --- Cards ---------------------------------------------------------------- */
+/* Every <article> is a Material card. Beer already thinks so; this pins the app's own surface,
+   radius and border so light and dark both read as Family-Link-style cards. */
+
+article {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 1.25rem;
+  padding: 1.15rem 1.2rem;
+  margin: 0.9rem 0;
+  box-shadow: none;
+  color: var(--on-surface);
+}
+/* A rule inside a card separates two groups (e.g. Save vs the per-device alert buttons) — it needs
+   real air around it, not a collapsed margin. */
+article hr { border: none; border-top: 1px solid var(--surface-container-high); margin: 1.2rem 0; }
+
+/* --- Buttons -------------------------------------------------------------- */
+
+button, [role="button"] {
+  text-transform: none; letter-spacing: 0;
+  font-weight: 550;
+  box-sizing: border-box;
+}
+button, a[role="button"] { min-height: 2.75rem; }
+button.danger {
+  background: var(--da-blocked); color: #fff;
+  border-color: var(--da-blocked);
+}
+:root[data-theme="dark"] button.danger { color: #2b0503; }
+button.danger:hover { filter: brightness(1.08); }
+button.quiet {
+  background: transparent; color: var(--primary);
+  border: 1px solid var(--outline-variant); box-shadow: none;
+}
+button.wide, .wide button, a.wide[role="button"] { width: 100%; }
+
+/* Beer only dresses real <button>s; the app's link-buttons need the same clothes. */
+a[role="button"] {
+  display: inline-flex; align-items: center; justify-content: center; gap: 0.4rem;
+  min-height: 2.5rem; padding: 0.35rem 1.1rem; border-radius: 2rem;
+  background: var(--primary); color: var(--on-primary);
+  text-decoration: none; font-weight: 550; font-size: 0.88rem;
+}
+a[role="button"].quiet {
+  background: transparent; color: var(--primary);
+  border: 1px solid var(--outline-variant);
+}
+
+/* --- Forms ---------------------------------------------------------------- */
+/* The views keep their semantic `<label>Text <input></label>` markup; the M3 outlined-field look
+   is drawn here rather than with Beer's .field wrappers, so no form had to be restructured. */
+
+label { display: block; font-size: 0.85rem; color: var(--on-surface-variant); margin: 0.7rem 0 0.5rem; }
+label > input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
+label > select { margin-top: 0.3rem; }
+
+input:where(:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="submit"])),
+select, textarea {
+  display: block; width: 100%; box-sizing: border-box;
+  background: var(--card-bg); color: var(--on-surface);
+  border: 1px solid var(--outline); border-radius: 0.85rem;
+  padding: 0.6rem 0.85rem; font-size: 1rem; font-family: inherit;
+}
+input:focus-visible, select:focus-visible, textarea:focus-visible {
+  outline: 2px solid var(--primary); outline-offset: -1px; border-color: var(--primary);
+}
+input[type="checkbox"], input[type="radio"] {
+  appearance: auto; -webkit-appearance: auto;
+  accent-color: var(--primary); width: 1.1rem; height: 1.1rem;
+  background: transparent; border: none; box-shadow: none;
+  display: inline-block; vertical-align: -2px; margin-right: 0.35rem;
+}
+/* Beer hides file inputs (opacity 0, absolute) expecting its own picker component; the app uses
+   plain HTML file fields. */
+input[type="file"] {
+  opacity: 1; position: static; inline-size: auto; block-size: auto; z-index: auto !important;
+  display: block; width: 100%; margin: 0.3rem 0 0.4rem; padding: 0.2rem 0;
+  color: var(--on-surface-variant);
+}
+
+/* Beer hides date/time inputs outside its .field component — opacity 0, absolute, padding and
+   border zeroed — because its picker is a JS dialog the app does not load. The app uses plain
+   HTML date fields in an inline row, so put them back. The selector mirrors Beer's own
+   (:not(.field) > input:is([type^=date],…)) so this wins on source order, not by accident. */
+:not(.field) > input[type="date"],
+:not(.field) > input[type="time"] {
+  opacity: 1; position: relative; inset: auto; z-index: auto !important;
+  inline-size: auto; block-size: auto;
+  display: inline-block; width: auto;
+  margin: 0; padding: 0.6rem 0.85rem; border: 1px solid var(--outline);
+}
+:not(.field) > input[type="date"]:focus-visible,
+:not(.field) > input[type="time"]:focus-visible {
+  outline: 2px solid var(--primary); outline-offset: -1px; border-color: var(--primary);
+}
+/* The calendar indicator is kept full-size and transparent so the whole field opens the picker.
+   Shrinking it to a corner icon would make only that icon clickable — the field would read as a
+   plain editable date rather than a picker. */
+input::-webkit-calendar-picker-indicator {
+  opacity: 0; position: absolute; inset: 0;
+  inline-size: 100%; block-size: 100%; cursor: pointer;
+}
+::placeholder { color: var(--on-surface-variant); opacity: 0.7; }
+
+form button, form input[type="submit"] { margin-top: 0.5rem; }
+
+/* Inline rows: a control next to a button, not a stacked form. Forms inside dissolve into the
+   flex row (display: contents), so two buttons from two forms sit on one exact baseline. */
+.inline { margin: 0; display: inline; }
+.inline-row { display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; }
+.inline-row form { display: contents; }
+.inline-row input, .inline-row select { width: auto; display: inline-block; }
+.inline-row button { margin: 0; }
+
+/* Collapsed card sections: the heading is the toggle, a chevron says so, and open costs one tap. */
+.collapse > summary {
+  display: flex; align-items: center; justify-content: space-between; gap: 0.6rem;
+  cursor: pointer; list-style: none;
+}
+.collapse > summary::-webkit-details-marker { display: none; }
+.collapse > summary h2, .collapse > summary h3 { margin: 0; pointer-events: none; }
+.collapse > summary::after {
+  content: ""; flex: none; width: 0.55rem; height: 0.55rem;
+  border-right: 2px solid var(--on-surface-variant); border-bottom: 2px solid var(--on-surface-variant);
+  transform: rotate(45deg); transition: transform 0.15s ease; margin-right: 0.2rem;
+}
+.collapse[open] > summary::after { transform: rotate(225deg); }
+.collapse[open] > summary { margin-bottom: 0.5rem; }
+@media (prefers-reduced-motion: reduce) { .collapse > summary::after { transition: none; } }
+
+/* --- Tags (state markers on cards and requests) --------------------------- */
+/* A tag only ever means: the Admin did this deliberately and it is still in effect. */
+
+.tags { display: flex; gap: 0.3rem; margin-left: auto; flex-wrap: wrap; }
+.tag {
+  font-size: 0.68rem; font-weight: 600; letter-spacing: 0.02em; text-transform: uppercase;
+  padding: 0.14rem 0.5rem; border-radius: 0.5rem;
+  border: 1px solid currentColor; color: var(--on-surface-variant);
+}
+.tag.locked { color: var(--da-locked); }
+.tag.disabled { color: var(--da-warn-fg); }
+.tag.revoked { color: var(--da-blocked); }
+.tag.offline { color: var(--da-offline); }
+
+/* Status chip: the one word of state on a client card, in the shared colour vocabulary.
+   Deliberately smaller and squarer than any button — it states, it does not invite a tap. */
+.chip-status {
+  font-size: 0.7rem; font-weight: 600; white-space: nowrap;
+  padding: 0.2rem 0.55rem; border-radius: 0.45rem;
+  flex: none; align-self: center;
+}
+.chip-status.s-active   { background: var(--da-active-container); color: var(--da-active); }
+.chip-status.s-grant    { background: var(--da-grant-container); color: var(--da-grant); }
+.chip-status.s-downtime,
+.chip-status.s-blocked  { background: var(--da-blocked-container); color: var(--da-blocked); }
+.chip-status.s-locked,
+.chip-status.s-unknown  { background: var(--da-locked-container); color: var(--da-locked); }
+
+/* --- Clients grid --------------------------------------------------------- */
+
+.client-grid {
+  display: grid; gap: 0.9rem; margin-top: 0.5rem;
+  grid-template-columns: repeat(auto-fill, minmax(19rem, 1fr));
+}
+
+.client-card {
+  display: block; text-decoration: none; color: inherit;
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 1.5rem;
+  padding: 1.1rem 1.2rem 1rem;
+  transition: transform 0.12s ease;
+}
+.client-card:hover { transform: translateY(-2px); }
+.client-card:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+
+.client-card .head { display: flex; align-items: center; gap: 0.8rem; }
+.avatar {
+  width: 2.75rem; height: 2.75rem; border-radius: 50%; flex: none;
+  background: var(--primary-container); color: var(--on-primary-container);
+  display: inline-flex; align-items: center; justify-content: center;
+}
+.avatar svg { width: 1.4rem; height: 1.4rem; }
+.avatar.off { background: var(--da-locked-container); color: var(--da-locked); }
+
+.client-card .name {
+  flex: 1; min-width: 0;
+  font-size: 1.02rem; font-weight: 550;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+/* Dot leads, text wraps inside its own span — the dot never drops onto a line of its own. */
+.conn {
+  font-size: 0.78rem; color: var(--on-surface-variant);
+  display: flex; align-items: baseline; gap: 0.4rem; flex-wrap: nowrap;
+}
+.conn > span:last-child { min-width: 0; }
+.conn .warn { white-space: nowrap; }
+.client-card .conn { margin: 0.55rem 0 0; }
+/* One line, whatever the version string says — a dev build's long tag clips instead of pushing
+   the whole card taller than its neighbours. */
+.client-card .conn > span:last-child { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* Connectivity only — never state. A Disabled Client is online, and a green "all is well" dot
+   would be a lie about a PC that is enforcing nothing. */
+.dot { width: 0.5rem; height: 0.5rem; border-radius: 50%; flex: none; background: var(--outline-variant); }
+.dot.online { background: var(--da-active); box-shadow: 0 0 0 3px color-mix(in srgb, var(--da-active) 22%, transparent); }
+
+/* Time Left, the number the card is for. Big and calm while time is running; the exception states
+   shrink and take the status colour. */
+.timeleft {
+  font-size: 1.9rem; font-weight: 380; letter-spacing: -0.01em; line-height: 1.2;
+  margin: 0.85rem 0 0.1rem; color: var(--on-surface);
+  font-variant-numeric: tabular-nums;
+}
+.timeleft b { font-weight: 550; }
+.timeleft small { font-size: 0.95rem; color: var(--on-surface-variant); font-weight: 400; }
+.timeleft.s-blocked, .timeleft.s-downtime { color: var(--da-blocked); font-size: 1.35rem; font-weight: 480; margin-top: 1rem; }
+.timeleft.s-locked { color: var(--da-locked); font-size: 1.35rem; font-weight: 480; margin-top: 1rem; }
+.timeleft.s-unknown { color: var(--on-surface-variant); font-size: 1.35rem; font-weight: 480; margin-top: 1rem; }
+/* Offline: last-known, dimmed and stamped — stale-but-labelled beats a confident lie or a blank. */
+.client-card.is-offline .timeleft { opacity: 0.55; }
+.client-card.is-revoked { opacity: 0.6; }
+
+/* The Foreground App, right now. Sits between the number the card is for and the running total,
+   because it answers a different question from either: not how long, but what. One line, always
+   present so a five-second re-render cannot change the card's height, and truncated with the name
+   in the title attribute — a Windows ProductName runs long far more often than it reads short. */
+.now-app {
+  margin: 0.1rem 0 0; font-size: 0.82rem; color: var(--on-surface-variant);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.client-card.is-offline .now-app { opacity: 0.55; }
+.hero .now-app { font-size: 0.9rem; margin: 0.1rem 0 0; }
+
+.used-note {
+  margin: 0.15rem 0 0.8rem; font-size: 0.82rem; color: var(--on-surface-variant);
+  font-variant-numeric: tabular-nums;
+}
+.client-card .meta {
+  display: flex; gap: 0.6rem; flex-wrap: wrap;
+  margin-top: 0.6rem; font-size: 0.75rem; color: var(--on-surface-variant);
+}
+
+/* The day so far, on the card itself: a slim 24-hour ribbon of the same timeline the Client Page
+   draws. Visibility over enforcement — the shape of the day should not be a tap away. */
+.ribbon svg { display: block; width: 100%; height: 14px; border-radius: 4px; }
+.ribbon-scale {
+  display: flex; justify-content: space-between;
+  font-size: 0.62rem; color: var(--on-surface-variant);
+  margin-top: 0.2rem; opacity: 0.85;
+}
+
+/* --- Client Page ---------------------------------------------------------- */
+
+.hero { text-align: center; padding: 0.5rem 0 0.3rem; }
+.hero .avatar { width: 3.4rem; height: 3.4rem; margin: 0 auto 0.5rem; }
+.hero .avatar svg { width: 1.7rem; height: 1.7rem; }
+.hero h1 {
+  font-size: 1.18rem; font-weight: 550; margin: 0 0 0.15rem;
+  display: flex; align-items: center; justify-content: center; gap: 0.45rem; flex-wrap: wrap;
+}
+.hero .tags { margin-left: 0; }
+.hero .conn { justify-content: center; flex-wrap: nowrap; align-items: baseline; }
+.hero .conn span:last-child { flex: 0 1 auto; }
+.hero .timeleft { font-size: 2.6rem; margin: 0.6rem 0 0.15rem; }
+.hero .timeleft.s-blocked, .hero .timeleft.s-downtime,
+.hero .timeleft.s-locked, .hero .timeleft.s-unknown { font-size: 1.7rem; }
+
+/* Quick actions: the three live commands, above the day card. Each is a button that opens its
+   dialog — one decision per tap, like every comparable app. */
+.quick h2 small { font-weight: 400; }
+.quick-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.6rem; margin-top: 0.4rem; }
+.quick-cell { margin: 0; display: contents; }
+.quick-btn {
+  display: flex; flex-direction: column; align-items: center; gap: 0.35rem;
+  background: var(--surface-container-low); color: var(--on-surface);
+  border: none; border-radius: 1.15rem;
+  padding: 0.85rem 0.4rem 0.75rem; margin: 0;
+  font-size: 0.78rem; font-weight: 550; height: auto; box-shadow: none;
+}
+.quick-btn svg { width: 1.35rem; height: 1.35rem; flex: none; color: var(--primary); }
+.quick-btn.danger { background: var(--surface-container-low); color: var(--da-blocked); }
+.quick-btn.danger svg { color: var(--da-blocked); }
+.quick-btn:disabled { opacity: 0.45; }
+
+/* Dialogs: Beer positions and animates <dialog>; this pins the app's sizing and the footer row. */
+dialog { width: min(92vw, 22rem); border-radius: 1.75rem; }
+dialog::backdrop { background: rgba(0, 0, 0, 0.4); }
+dialog h2 { margin-top: 0; }
+dialog label:first-of-type { margin-top: 0.3rem; }
+.dlg-actions { display: flex; justify-content: flex-end; gap: 0.6rem; margin-top: 1.4rem; }
+.dlg-actions button { margin: 0; }
+
+/* Each action is its own form; the caption under a button explains that button. */
+.actions form { margin-bottom: 1rem; }
+.actions form:last-child { margin-bottom: 0; }
+.actions form > small { display: block; margin-top: 0.3rem; color: var(--on-surface-variant); }
+.actions hr { margin: 1.2rem 0; border-color: var(--surface-container-high); }
+.danger-zone-panel { margin-top: 1.2rem; padding: 0.9rem; border: 1px solid color-mix(in srgb, var(--da-blocked) 45%, var(--card-border)); border-radius: 1rem; }
+.danger-zone-panel h3 { margin-top: 0; color: var(--da-blocked); }
+
+.day-head { display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap; }
+.day-head h2 { margin: 0; }
+.day-used { font-size: 1.05rem; }
+.day-foot { margin: 1rem 0 0; }
+
+.columns { display: grid; grid-template-columns: 1fr; gap: 1rem; }
+.columns article { margin: 0; }
+.scroll-x { overflow-x: auto; }
+svg.timeline { width: 100%; min-width: 640px; height: 52px; display: block; }
+svg.bars { width: 100%; min-width: 640px; height: 140px; display: block; margin-top: 0.4rem; }
+
+.legend { display: flex; gap: 0.9rem; flex-wrap: wrap; font-size: 0.75rem; color: var(--on-surface-variant); margin-top: 0.5rem; }
+.legend .sw { display: inline-block; width: 12px; height: 12px; border-radius: 3px; vertical-align: -1px; margin-right: 0.25rem; }
+.legend .legend-sep { border-left: 1px solid var(--outline-variant); padding-left: 0.75rem; }
+.legend .sw.mark { background: var(--da-warn-fg); }
+
+.apps { display: flex; flex-direction: column; gap: 0.3rem; margin-top: 0.3rem; }
+.app-row { display: grid; grid-template-columns: 8rem 1fr 4rem; align-items: center; gap: 0.5rem; }
+.app-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.app-bar { background: var(--surface-container-high); border-radius: 3px; height: 14px; }
+.app-bar b { display: block; height: 14px; background: var(--da-grant); border-radius: 3px; }
+.app-min { text-align: right; font-variant-numeric: tabular-nums; color: var(--on-surface-variant); font-size: 0.85rem; }
+
+/* --- Block Screen Backgrounds --------------------------------------------- */
+
+.bg-slots { display: grid; gap: 1.25rem; grid-template-columns: 1fr; }
+@media (min-width: 40rem) { .bg-slots { grid-template-columns: 1fr 1fr; } }
+.bg-slot h4 { margin-bottom: 0.15rem; }
+.bg-slot form { margin: 0.4rem 0 0; }
+.bg-slot input[type="file"] { margin-bottom: 0.4rem; }
+
+/* 16:9 because that is the shape most of these end up cropped to on a monitor. object-fit matches
+   the UniformToFill the client draws with, so the preview crops where the real thing crops. */
+.bg-thumb {
+  display: block; width: 100%; aspect-ratio: 16 / 9; object-fit: cover;
+  border-radius: 0.85rem; border: 1px solid var(--outline-variant); background: #121624;
+}
+.bg-thumb-empty { background: #121624; }
+
+/* --- Codes ---------------------------------------------------------------- */
+
+/* A code is read out loud, so it must be one unbroken line — a break turns "380-394-030" into two
+   numbers. Sizes are tuned per length: six admin digits can be huge, the eleven glyphs of an Extra
+   Time Code (nine digits, two dashes) get a size that still fits a phone in one line. */
+.code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-weight: 700; margin: 0.3rem 0; line-height: 1.1;
+  font-variant-numeric: tabular-nums; white-space: nowrap;
+}
+.code-admin { font-size: clamp(2.2rem, 11vw, 3.2rem); letter-spacing: 0.1em; }
+.code-extra { font-size: clamp(1.6rem, 7.4vw, 2.6rem); letter-spacing: 0.06em; }
+/* The code is the hero of its card: centered, with its caption and actions centered under it. */
+.code, .grant-says { text-align: center; }
+.code-row { display: flex; align-items: center; justify-content: center; gap: 0.6rem 1rem; flex-wrap: wrap; margin-top: 0.5rem; }
+
+/* The two codes are told apart by colour first and by length second. Blue is not decoration: it is
+   the same blue the timeline uses for extra time. Red lands on the code that can stop the app.
+   Deliberately not red-and-green — that is the one pair a colour-blind reader cannot separate.
+   The digit count is the tell that survives colour entirely. */
+.code-admin { color: var(--da-blocked); }
+.code-extra { color: var(--da-grant); }
+
+.code-tag {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.7rem; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase;
+  padding: 0.15rem 0.5rem; border-radius: 2rem; vertical-align: middle; margin-left: 0.4rem;
+  border: 1px solid currentColor;
+}
+.code-tag-admin { color: var(--da-blocked); }
+.code-tag-extra { color: var(--da-grant); }
+
+/* Louder than .muted and quieter than an error: a standing property, not something gone wrong. */
+.warn-note {
+  color: var(--da-warn-fg); background: var(--da-warn-bg);
+  border: 1px solid var(--da-warn-border); border-radius: 0.85rem;
+  padding: 0.6rem 0.75rem; font-size: 0.9rem; margin: 0.5rem 0;
+}
+article.warn-note { padding: 1rem 1.1rem; }
+
+/* Presets. The last choice is remembered on the device. The custom box sits on its own row below
+   the five chips — on a phone they cannot all share a line, and a deliberate second row beats an
+   accidental wrap. */
+.chips { display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center; margin: 0.5rem 0; }
+.chips button {
+  margin: 0; padding: 0.35rem 0.85rem; min-height: 2.6rem; border-radius: 2rem;
+  background: transparent; color: var(--on-surface);
+  border: 1px solid var(--outline-variant); box-shadow: none;
+}
+.chips button.on {
+  background: var(--primary); border-color: var(--primary); color: var(--on-primary);
+}
+.chips input { flex: 1 1 100%; max-width: 9rem; margin: 0.15rem 0 0; display: inline-block; }
+
+/* Validity is drawn, not counted down in text: a shown code is good for ~30–60s and a ticking
+   "7s left" reads as panic where none is warranted. */
+.validity { display: flex; align-items: center; gap: 0.5rem; color: var(--on-surface-variant); font-size: 0.85rem; }
+.ring { width: 1.15rem; height: 1.15rem; flex: none; transform: rotate(-90deg); }
+.ring circle { fill: none; stroke-width: 3; }
+.ring .track { stroke: var(--outline-variant); }
+.ring .value { stroke: var(--primary); transition: stroke-dashoffset 0.9s linear; }
+
+/* Copy is the only action under a code, so it dresses as a tonal chip rather than a thin outline —
+   and the validity ring reads as the quiet meta beside it. */
+.code-row button.quiet {
+  background: var(--primary-container); color: var(--on-primary-container);
+  border: none; min-height: 2.4rem; padding: 0.3rem 1rem;
+}
+.copied { color: var(--da-active); font-size: 0.85rem; }
+.grant-says { font-size: 0.95rem; color: var(--on-surface-variant); margin: 0.15rem 0 0; }
+
+.offline-strip {
+  display: flex; align-items: center; gap: 0.5rem;
+  background: var(--da-warn-bg); color: var(--da-warn-fg);
+  border: 1px solid var(--da-warn-border); border-radius: 0.85rem;
+  padding: 0.6rem 0.9rem; margin-bottom: 1rem; font-size: 0.9rem;
+}
+
+/* --- Requests ------------------------------------------------------------- */
+
+.request header { display: flex; gap: 0.5rem; align-items: baseline; flex-wrap: wrap; }
+.request .decide { display: flex; gap: 0.5rem; align-items: center; margin: 0.6rem 0 0; flex-wrap: wrap; }
+.request .decide input { width: 6rem; margin: 0; display: inline-block; }
+.request .decide button { width: auto; margin: 0; }
+.request + .request { margin-top: 0.8rem; }
+
+.quiet-empty { color: var(--on-surface-variant); }
+.past-requests td { padding: 0.25rem 0.6rem 0.25rem 0; border: 0; }
+.past-requests tr.s-lapsed { color: var(--on-surface-variant); }
+.past-requests tr.s-approved td:last-child { color: var(--da-active); }
+.past-requests tr.s-declined td:last-child { color: var(--da-blocked); }
+
+/* Date headings over the history. Quiet — they are there so the eye can see how many asks fell on
+   one evening, which is the whole reason this list is read in order rather than a day at a time. */
+.day-head {
+  font-size: 0.78rem; font-weight: 600; letter-spacing: 0.02em;
+  color: var(--on-surface-variant); margin: 1rem 0 0.2rem;
+  font-variant-numeric: tabular-nums;
+}
+.day-head:first-of-type { margin-top: 0.4rem; }
+
+.pager { display: flex; justify-content: space-between; gap: 1rem; margin-top: 1.2rem; }
+.pager a { font-size: 0.85rem; }
+
+/* A row that has just arrived on a poll gets a brief highlight and nothing more. */
+@keyframes da-flash { from { background: color-mix(in srgb, var(--primary) 22%, transparent); } to { background: transparent; } }
+.is-new { animation: da-flash 1.6s ease-out; }
+
+/* --- Logs ------------------------------------------------------------------ */
+
+.seg-tabs { display: flex; gap: 0.5rem; margin: 0.5rem 0; }
+.seg-tabs a {
+  padding: 0.35rem 0.9rem; border: 1px solid var(--outline-variant); border-radius: 2rem;
+  text-decoration: none; color: var(--on-surface); font-size: 0.88rem;
+}
+.seg-tabs a.on { background: var(--primary-container); color: var(--on-primary-container); border-color: var(--primary-container); font-weight: 550; }
+.pager { display: flex; gap: 1rem; margin-top: 0.6rem; }
+
+table { font-size: 0.9rem; }
+th { color: var(--on-surface-variant); font-weight: 600; }
+
+/* --- Status Bento design system ------------------------------------------- */
+
+.page-heading {
+  display: grid; grid-template-columns: 1fr minmax(7rem, 13rem); align-items: end;
+  gap: 0.25rem 1rem; margin: 1.4rem 0 1.2rem;
+}
+.page-heading .eyebrow {
+  grid-column: 1 / -1; margin: 0; color: var(--on-surface-variant);
+  font-size: 0.72rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
+}
+.page-heading h1 { margin: 0; }
+.page-heading .lead { margin: 0 0 0.15rem; color: var(--on-surface-variant); font-size: 0.9rem; line-height: 1.45; }
+
+.dashboard-overview {
+  display: grid; grid-template-columns: 1.3fr 0.7fr; gap: 0.75rem; margin: 0.8rem 0 1.7rem;
+}
+.overview-tile {
+  min-height: 8.5rem; padding: 1.05rem; border: 1px solid var(--card-border);
+  border-radius: 1.35rem; background: var(--card-bg); color: var(--on-surface);
+}
+.overview-primary {
+  position: relative; overflow: hidden; background: #172246; color: #f7f8ff; border-color: #172246;
+}
+.overview-primary::after {
+  content: ""; position: absolute; width: 8rem; height: 8rem; right: -3.1rem; bottom: -3.7rem;
+  border: 1.7rem solid rgba(255, 255, 255, 0.08); border-radius: 50%;
+}
+.overview-tile .metric-label { display: block; color: inherit; opacity: 0.78; font-size: 0.78rem; }
+.overview-tile .metric-value {
+  display: block; margin-top: 1rem; font-size: 2.25rem; font-weight: 720;
+  letter-spacing: -0.05em; line-height: 1;
+}
+.overview-tile .metric-note { display: block; margin-top: 0.45rem; color: inherit; opacity: 0.72; font-size: 0.75rem; }
+.overview-secondary { display: grid; grid-template-rows: 1fr 1fr; gap: 0.75rem; }
+.overview-mini { min-height: 0; }
+.overview-mini .metric-value { margin-top: 0.55rem; font-size: 1.55rem; }
+
+.section-heading {
+  display: flex; align-items: end; justify-content: space-between; gap: 1rem;
+  margin: 1.6rem 0 0.7rem;
+}
+.section-heading h2, .section-heading p { margin: 0; }
+.page-back { margin: 0.8rem 0 0; }
+.page-back a { color: var(--on-surface-variant); text-decoration: none; font-size: 0.85rem; font-weight: 600; }
+.page-back a:hover { color: var(--primary); }
+
+/* Cards are bento modules now: compact, equal-edged, and useful in a grid. */
+.client-grid { gap: 0.75rem; grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr)); }
+.client-card { border-radius: 1.3rem; padding: 1rem; }
+.client-card .head { gap: 0.7rem; }
+.avatar { border-radius: 0.85rem; }
+.client-card .conn { margin-top: 0.4rem; }
+.timeleft { font-size: 2.15rem; font-weight: 680; letter-spacing: -0.045em; }
+.used-note { margin-bottom: 0.55rem; }
+.ribbon svg { height: 8px; border-radius: 999px; }
+.ribbon-scale { display: none; }
+
+.status-board { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin: 0.65rem 0; }
+.status-board .hero {
+  grid-column: 1 / -1; position: relative; overflow: hidden; text-align: left;
+  padding: 1.15rem; border-radius: 1.35rem; background: #172246; color: #f7f8ff;
+}
+.status-board .hero::after {
+  content: ""; position: absolute; width: 11rem; height: 11rem; right: -4.5rem; top: -5.5rem;
+  border-radius: 50%; background: rgba(255,255,255,0.055);
+}
+.status-board .hero .avatar { display: none; }
+.status-board .hero h1 { justify-content: flex-start; color: #f7f8ff; font-size: 1.15rem; }
+.status-board .hero .conn { justify-content: flex-start; color: #c7cceb; }
+.status-board .hero .timeleft { margin-top: 1.3rem; color: #fff; font-size: clamp(2.7rem, 12vw, 4.2rem); }
+.status-board .hero .timeleft small, .status-board .hero .now-app { color: #c7cceb; }
+.status-board .hero .now-app { font-size: 0.82rem; }
+.status-board .hero .chip-status { background: rgba(255,255,255,0.14); color: #fff; }
+.status-metric {
+  min-height: 7rem; padding: 1rem; border: 1px solid var(--card-border);
+  border-radius: 1.25rem; background: var(--card-bg);
+}
+.status-metric span { display: block; color: var(--on-surface-variant); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; }
+.status-metric strong { display: block; margin-top: 1.35rem; font-size: 1.55rem; line-height: 1; letter-spacing: -0.035em; }
+.status-metric:last-child { grid-column: 1 / -1; }
+
+.quick { margin-top: 0.75rem; }
+.quick-grid { gap: 0.75rem; }
+.quick-btn { min-height: 5rem; border: 1px solid var(--card-border); background: var(--card-bg); border-radius: 1.2rem; }
+
+.bento-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+.bento-grid > article { margin: 0; min-width: 0; }
+.bento-grid > .wide { grid-column: 1 / -1; }
+.bento-grid > article:has(details[open]) { grid-column: 1 / -1; }
+.bento-grid details:not([open]) { min-height: 2.4rem; }
+.bento-grid summary { min-height: 2.4rem; }
+.bento-grid article > details:not([open]) > summary h2 { font-size: 1rem; }
+
+.request-overview { margin-bottom: 1.1rem; }
+.request-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr)); gap: 0.75rem; }
+.request-grid .request { margin: 0; }
+.request-grid .quiet-empty { grid-column: 1 / -1; }
+.request .decide { padding-top: 0.4rem; border-top: 1px solid var(--outline-variant); }
+
+.codes-grid { display: grid; grid-template-columns: minmax(0, 2fr) minmax(16rem, 1fr); gap: 0.75rem; align-items: start; }
+.codes-grid > article, .codes-support > article { margin: 0; min-width: 0; }
+.codes-support { display: grid; gap: 0.75rem; align-content: start; min-width: 0; }
+.code-icon-sprite { position: absolute; width: 0; height: 0; overflow: hidden; }
+.code-panel-title { display: flex; align-items: center; gap: 0.7rem; min-width: 0; }
+.code-panel-title h2 { margin: 0 !important; line-height: 1.2; }
+.code-panel-icon {
+  width: 2rem; height: 2rem; flex: none; padding: 0.4rem; border-radius: 0.65rem;
+  fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round;
+  color: var(--on-primary-container); background: var(--primary-container);
+}
+.codes-grid .code-hero { background: #172246; color: #f7f8ff; border-color: #172246; }
+.codes-grid .code-hero .code-panel-icon { color: #cbd2ff; background: rgba(203, 210, 255, 0.14); }
+.codes-grid .code-hero .muted, .codes-grid .code-hero .grant-says { color: #c7cceb; }
+.codes-grid .code-hero .code-extra { color: #cbd2ff; }
+.codes-grid .code-hero .chips button { width: auto; color: #f7f8ff; border-color: rgba(255,255,255,0.3); }
+.codes-grid .code-hero .chips button.on { color: #172246; background: #cbd2ff; }
+.codes-grid .code-hero input { background: rgba(255,255,255,0.09); color: #fff; border-color: rgba(255,255,255,0.35); }
+.codes-grid .code-row button { width: auto; }
+.danger-zone { border-color: color-mix(in srgb, var(--da-blocked) 45%, var(--card-border)); }
+
+.coupon-mint { display: grid; grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr)); gap: 0.65rem; align-items: end; }
+.coupon-mint label { margin: 0; }
+.coupon-mint button { margin: 0; }
+.coupon-mint .mint-action { min-width: 8rem; }
+
+.settings-bento { grid-template-columns: 1fr; }
+.settings-bento > .span-all { grid-column: 1 / -1; }
+.settings-bento > article:has(details[open]) { grid-column: 1 / -1; }
+.settings-bento article { min-height: 5.6rem; }
+.settings-bento article > h2 { margin-top: 0; }
+.settings-icon-sprite, .client-icon-sprite { position: absolute; width: 0; height: 0; overflow: hidden; }
+.settings-summary-title, .client-summary-title { display: flex; align-items: center; gap: 0.75rem; min-width: 0; }
+.settings-summary-title h2, .client-summary-title h2 { margin: 0 !important; line-height: 1.2; }
+.settings-summary-icon, .client-summary-icon {
+  width: 2rem; height: 2rem; flex: none; padding: 0.4rem; border-radius: 0.65rem;
+  fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round;
+  color: var(--on-primary-container); background: var(--primary-container);
+}
+.settings-bento details[open] .settings-summary-icon,
+.client-tools details[open] .client-summary-icon { color: var(--on-primary); background: var(--primary); }
+.columns.client-tools { grid-template-columns: 1fr; }
+.updates-more { margin-top: 0.75rem; }
+.settings-heading { grid-template-columns: 1fr; gap: 0.35rem; }
+.settings-heading .lead { max-width: 34rem; }
+
+.auth-shell { width: min(100%, 27rem); margin: 9vh auto 0; }
+.auth-shell.auth-wide { width: min(100%, 42rem); margin-top: 4vh; }
+.auth-shell .auth-brand { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1.3rem; }
+.auth-shell .auth-brand img { width: 2.7rem; height: 2.7rem; border-radius: 0.85rem; }
+.auth-shell .auth-brand h1 { margin: 0; font-size: 1.7rem; }
+.auth-shell article { padding: 1.35rem; }
+
+.data-card { overflow: hidden; }
+.data-toolbar { display: flex; gap: 0.6rem; flex-wrap: wrap; align-items: center; margin-bottom: 1rem; }
+.data-toolbar form { margin: 0; }
+.select-all-control { display: inline-flex; align-items: center; gap: 0.45rem; margin: 0; cursor: pointer; }
+.row-select-hit { display: inline-flex; margin: 0; cursor: pointer; }
+
+/* A dense desktop table becomes a readable stack of bento rows on a phone. */
+.responsive-table { width: 100%; }
+.responsive-table .state-icon { width: 1.25rem; height: 1.25rem; margin: auto; color: var(--on-surface-variant); }
+
+/* --- Responsive ------------------------------------------------------------ */
+
+@media (max-width: 46rem) {
+  .columns { grid-template-columns: 1fr; }
+  input, select { font-size: 16px; }   /* 16px stops iOS zooming in on focus */
+  table:not(.responsive-table) { display: block; overflow-x: auto; white-space: nowrap; }
+  .app-row { grid-template-columns: 6rem 1fr 3.5rem; }
+  svg.timeline, svg.bars { min-width: 0; }
+  .page-heading { grid-template-columns: 1fr minmax(6.5rem, 9.5rem); }
+  .codes-heading, .settings-heading { grid-template-columns: 1fr; gap: 0.35rem; }
+  .codes-heading .lead, .settings-heading .lead { max-width: 25rem; }
+  .codes-grid { grid-template-columns: 1fr; }
+  .dashboard-overview { grid-template-columns: 1.25fr 0.75fr; }
+  .overview-tile { min-height: 8rem; padding: 0.9rem; }
+  .overview-tile .metric-value { font-size: 2rem; }
+  .bento-grid { grid-template-columns: 1fr 1fr; }
+  .settings-bento { grid-template-columns: 1fr; }
+  .bento-grid > article:has(details[open]), .bento-grid > article.always-open { grid-column: 1 / -1; }
+
+  .responsive-table, .responsive-table tbody, .responsive-table tr, .responsive-table td { display: block; width: 100%; }
+  .responsive-table thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+  .responsive-table tbody { display: grid; gap: 0.65rem; }
+  .responsive-table tr { position: relative; padding: 0.8rem 0.9rem; border: 1px solid var(--card-border); border-radius: 1rem; background: var(--surface-container-low); }
+  .responsive-table td { display: grid; grid-template-columns: minmax(6rem, 0.7fr) 1fr; gap: 0.8rem; padding: 0.28rem 0; border: 0; white-space: normal; text-align: left !important; }
+  .responsive-table td::before { content: attr(data-label); color: var(--on-surface-variant); font-size: 0.76rem; }
+  /* The checkbox is a real control on a phone: a padded label makes the tap target ~47px
+     (Material's 48px guidance), and the row leaves it a lane so content never sits under it. */
+  .responsive-table td.row-select { display: block; position: absolute; right: 0; top: 0; width: auto; padding: 0; }
+  .responsive-table td.row-select .row-select-hit { padding: 0.8rem; }
+  .responsive-table td.row-select input { width: 1.35rem; height: 1.35rem; }
+  .responsive-table tr:has(.row-select) { padding-right: 3.1rem; }
+  .responsive-table td.row-select::before, .responsive-table td.row-action::before { display: none; }
+  .responsive-table td.row-action { display: block; margin-top: 0.35rem; }
+  .responsive-table td.row-action button { width: 100%; }
+}
+
+@media (min-width: 46rem) {
+  .dashboard-overview { grid-template-columns: 1.5fr 0.75fr 0.75fr; }
+  .overview-secondary { display: contents; }
+  .status-board { grid-template-columns: minmax(20rem, 1.35fr) 0.65fr; }
+  .status-board .hero { grid-column: 1; grid-row: span 3; }
+  .status-board .status-metric { grid-column: 2; }
+  .bento-grid { grid-template-columns: repeat(3, 1fr); }
+  .bento-grid > .wide { grid-column: span 2; }
+  .settings-bento { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .columns { grid-template-columns: repeat(3, 1fr); }
+  .columns > article:has(details[open]) { grid-column: 1 / -1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .client-card, .ring .value, .is-new { transition: none; animation: none; }
+}

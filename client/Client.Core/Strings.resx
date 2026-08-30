@@ -1,0 +1,502 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="AppName" xml:space="preserve">
+    <value>Digital Aid</value>
+    <comment>Product name. Not translated.</comment>
+  </data>
+  <data name="Close" xml:space="preserve">
+    <value>Close</value>
+  </data>
+  <data name="Continue" xml:space="preserve">
+    <value>Continue</value>
+  </data>
+  <data name="NeverMind" xml:space="preserve">
+    <value>Never mind</value>
+  </data>
+  <data name="AskForMoreTime" xml:space="preserve">
+    <value>Ask for more time</value>
+    <comment>Button and window title. The kid asking a parent.</comment>
+  </data>
+  <data name="TrayTimeLeft" xml:space="preserve">
+    <value>Time left…</value>
+  </data>
+  <data name="TrayAskForTime" xml:space="preserve">
+    <value>Ask for more time…</value>
+  </data>
+  <data name="TrayEnterCode" xml:space="preserve">
+    <value>Enter extra time code…</value>
+  </data>
+  <data name="TrayLockScreen" xml:space="preserve">
+    <value>Lock the screen</value>
+  </data>
+  <data name="TrayReconnect" xml:space="preserve">
+    <value>Reconnect now</value>
+  </data>
+  <data name="TrayReconnectTrying" xml:space="preserve">
+    <value>Reconnect now (trying…)</value>
+  </data>
+  <data name="TrayReconnectInSec" xml:space="preserve">
+    <value>Reconnect now (next try in {0} s)</value>
+  </data>
+  <data name="TrayReconnectInMin" xml:space="preserve">
+    <value>Reconnect now (next try in {0} min)</value>
+  </data>
+  <data name="TrayConnected" xml:space="preserve">
+    <value>Connected</value>
+  </data>
+  <data name="TrayPair" xml:space="preserve">
+    <value>Pair with server…</value>
+  </data>
+  <data name="TrayExit" xml:space="preserve">
+    <value>Exit protection…</value>
+  </data>
+  <data name="TrayAbout" xml:space="preserve">
+    <value>About Digital Aid…</value>
+  </data>
+  <data name="TrayLanguage" xml:space="preserve">
+    <value>Language</value>
+    <comment>Tray submenu holding the two languages.</comment>
+  </data>
+  <data name="LanguageEnglish" xml:space="preserve">
+    <value>English</value>
+    <comment>Always in its own language, so it is findable from either.</comment>
+  </data>
+  <data name="LanguageHungarian" xml:space="preserve">
+    <value>Magyar</value>
+    <comment>Always in its own language, so it is findable from either.</comment>
+  </data>
+  <data name="StatusNotSetUp" xml:space="preserve">
+    <value>not set up</value>
+  </data>
+  <data name="StatusScreenLocked" xml:space="preserve">
+    <value>screen locked</value>
+  </data>
+  <data name="StatusOutOfTime" xml:space="preserve">
+    <value>out of time</value>
+  </data>
+  <data name="StatusDowntime" xml:space="preserve">
+    <value>downtime</value>
+  </data>
+  <data name="StatusLockedByParent" xml:space="preserve">
+    <value>locked by a parent</value>
+  </data>
+  <data name="StatusExtraTime" xml:space="preserve">
+    <value>extra time, {0} min</value>
+  </data>
+  <data name="StatusMinutesLeft" xml:space="preserve">
+    <value>{0} min left</value>
+  </data>
+  <data name="StatusOffline" xml:space="preserve">
+    <value> (offline)</value>
+  </data>
+  <data name="StatusDisconnected" xml:space="preserve">
+    <value> (disconnected by parent)</value>
+  </data>
+  <data name="TrayTooltip" xml:space="preserve">
+    <value>Digital Aid — {0}{1}</value>
+    <comment>{0} status, {1} suffix.</comment>
+  </data>
+  <data name="Warn15Left" xml:space="preserve">
+    <value>Less than 15 minutes left</value>
+    <comment>Fires on crossing the threshold, so 'less than' is literally true.</comment>
+  </data>
+  <data name="Warn15Downtime" xml:space="preserve">
+    <value>Less than 15 minutes until downtime</value>
+  </data>
+  <data name="Warn5Left" xml:space="preserve">
+    <value>Less than 5 minutes left</value>
+  </data>
+  <data name="Warn5Downtime" xml:space="preserve">
+    <value>Less than 5 minutes until downtime</value>
+  </data>
+  <data name="WarnWrapUp" xml:space="preserve">
+    <value>Time to think about wrapping up.</value>
+  </data>
+  <data name="WarnSaveNow" xml:space="preserve">
+    <value>Save your game or your work now.</value>
+  </data>
+  <data name="BlockHeadline" xml:space="preserve">
+    <value>Time to take a break</value>
+  </data>
+  <data name="BlockGotCode" xml:space="preserve">
+    <value>Got a code from a parent?</value>
+  </data>
+  <data name="BlockUnlock" xml:space="preserve">
+    <value>Unlock</value>
+  </data>
+  <data name="BlockShutDown" xml:space="preserve">
+    <value>Shut down</value>
+  </data>
+  <data name="BlockExitApp" xml:space="preserve">
+    <value>Exit application</value>
+  </data>
+  <data name="BlockReasonDowntime" xml:space="preserve">
+    <value>It's downtime until {0}.</value>
+    <comment>{0} is a HH:mm time.</comment>
+  </data>
+  <data name="BlockReasonLocked" xml:space="preserve">
+    <value>Locked by a parent. They will turn it back on — a code won't unlock it.</value>
+  </data>
+  <data name="CodeBad" xml:space="preserve">
+    <value>That code doesn't work. Ask a parent for a new one.</value>
+  </data>
+  <data name="CodeAlreadyUsed" xml:space="preserve">
+    <value>That code was already used — ask for a fresh one.</value>
+  </data>
+  <data name="CouponChecking" xml:space="preserve">
+    <value>Checking the coupon…</value>
+  </data>
+  <data name="CouponGranted" xml:space="preserve">
+    <value>Coupon accepted — {0} minutes added to today.</value>
+    <comment>{0} is a whole number of minutes.</comment>
+  </data>
+  <data name="CouponAlreadyUsed" xml:space="preserve">
+    <value>This coupon has already been used.</value>
+  </data>
+  <data name="CouponExpired" xml:space="preserve">
+    <value>This coupon has expired.</value>
+  </data>
+  <data name="CouponWrongClient" xml:space="preserve">
+    <value>This coupon is for another computer.</value>
+  </data>
+  <data name="CouponInvalid" xml:space="preserve">
+    <value>This coupon isn't valid.</value>
+  </data>
+  <data name="CouponOffline" xml:space="preserve">
+    <value>Coupons need the server — try again later.</value>
+  </data>
+  <data name="CouponDowntime" xml:space="preserve">
+    <value>Coupons can't be used during downtime.</value>
+  </data>
+  <data name="ShutDownConfirm" xml:space="preserve">
+    <value>Shut down this PC?</value>
+  </data>
+  <data name="FlyoutGrantHeadline" xml:space="preserve">
+    <value>{0} minutes of extra time</value>
+    <comment>Hungarian takes no plural after a numeral.</comment>
+  </data>
+  <data name="FlyoutGrantSub" xml:space="preserve">
+    <value>A parent gave you extra time.</value>
+  </data>
+  <data name="FlyoutLeftToday" xml:space="preserve">
+    <value>{0} minutes left today</value>
+  </data>
+  <data name="FlyoutDowntime" xml:space="preserve">
+    <value>Downtime</value>
+  </data>
+  <data name="FlyoutDowntimeSub" xml:space="preserve">
+    <value>Back at {0}.</value>
+  </data>
+  <data name="FlyoutExhausted" xml:space="preserve">
+    <value>No time left today</value>
+  </data>
+  <data name="FlyoutExhaustedSub" xml:space="preserve">
+    <value>It resets tomorrow.</value>
+  </data>
+  <data name="FlyoutPaused" xml:space="preserve">
+    <value>Paused by a parent</value>
+  </data>
+  <data name="FlyoutPausedSub" xml:space="preserve">
+    <value>Ask them to turn it back on.</value>
+  </data>
+  <data name="FlyoutStepAway" xml:space="preserve">
+    <value>I'm stepping away</value>
+  </data>
+  <data name="FlyoutStepAwayHint" xml:space="preserve">
+    <value>Locks the screen. Your time stops until you sign back in.</value>
+  </data>
+  <data name="FlyoutStepAwayGrant" xml:space="preserve">
+    <value>Locks the screen. Your extra time keeps running, though.</value>
+  </data>
+  <data name="FlyoutDowntimeIs" xml:space="preserve">
+    <value>Downtime is {0}–{1}.</value>
+  </data>
+  <data name="FlyoutOnline" xml:space="preserve">
+    <value>Connected to the family server.</value>
+  </data>
+  <data name="FlyoutRejected" xml:space="preserve">
+    <value>This PC was disconnected from the server. It is still using the last settings it had. A parent can reconnect it from the tray menu.</value>
+  </data>
+  <data name="FlyoutNeverReached" xml:space="preserve">
+    <value>Never reached the family server — using the settings it came with.</value>
+  </data>
+  <data name="FlyoutOfflineShort" xml:space="preserve">
+    <value>Working offline — limits still apply.</value>
+  </data>
+  <data name="FlyoutOfflineFor" xml:space="preserve">
+    <value>Working offline for {0} — still using the rules from then.</value>
+  </data>
+  <data name="AgoDays" xml:space="preserve">
+    <value>{0} days</value>
+  </data>
+  <data name="AgoHours" xml:space="preserve">
+    <value>{0} hours</value>
+  </data>
+  <data name="AgoOverAnHour" xml:space="preserve">
+    <value>over an hour</value>
+  </data>
+  <data name="AskTitle" xml:space="preserve">
+    <value>Digital Aid — ask for more time</value>
+  </data>
+  <data name="AskQuestion" xml:space="preserve">
+    <value>How much more time do you want to ask for?</value>
+  </data>
+  <data name="AskMinutes" xml:space="preserve">
+    <value>{0} minutes</value>
+  </data>
+  <data name="AskFootnote" xml:space="preserve">
+    <value>A parent decides how much you actually get — they might give more or less.</value>
+  </data>
+  <data name="AskSent" xml:space="preserve">
+    <value>Asked. Waiting for a reply…</value>
+  </data>
+  <data name="AskAlreadyOpen" xml:space="preserve">
+    <value>You already asked — still waiting for a reply.</value>
+  </data>
+  <data name="AskCooldown" xml:space="preserve">
+    <value>You asked recently. You can ask again in {0} min.</value>
+  </data>
+  <data name="AskUnreachable" xml:space="preserve">
+    <value>Couldn't reach the server, so nobody was asked. Try again in a bit.</value>
+  </data>
+  <data name="AskApprovedTitle" xml:space="preserve">
+    <value>{0} more minutes</value>
+  </data>
+  <data name="AskApprovedBody" xml:space="preserve">
+    <value>A parent said yes.</value>
+  </data>
+  <data name="AskDeclinedTitle" xml:space="preserve">
+    <value>Not right now</value>
+  </data>
+  <data name="AskDeclinedBody" xml:space="preserve">
+    <value>A parent said no this time. You can ask again later.</value>
+  </data>
+  <data name="ExtraTimeTitle" xml:space="preserve">
+    <value>Extra time</value>
+    <comment>Toast title when a Grant lands.</comment>
+  </data>
+  <data name="MessageFromParent" xml:space="preserve">
+    <value>Message from your parent</value>
+  </data>
+  <data name="ExtraCodeWindow" xml:space="preserve">
+    <value>Digital Aid — extra time</value>
+  </data>
+  <data name="ExtraCodePrompt" xml:space="preserve">
+    <value>Enter the code a parent read out.</value>
+  </data>
+  <data name="ExtraCodeUse" xml:space="preserve">
+    <value>Use code</value>
+  </data>
+  <data name="ExitWindowTitle" xml:space="preserve">
+    <value>Digital Aid — exit protection</value>
+  </data>
+  <data name="ExitPrompt" xml:space="preserve">
+    <value>Enter an Admin Code to stop Digital Aid on this PC. It will stay off until it is started again.</value>
+  </data>
+  <data name="ExitButton" xml:space="preserve">
+    <value>Stop protection</value>
+  </data>
+  <data name="RepairWindowTitle" xml:space="preserve">
+    <value>Digital Aid — pair with another server</value>
+  </data>
+  <data name="RepairPrompt" xml:space="preserve">
+    <value>This PC is already paired. Enter an Admin Code to point it at a different server — today's usage and its history on the current server stay behind.</value>
+  </data>
+  <data name="AdminCodeHint" xml:space="preserve">
+    <value>Enter the 6 digits from the authenticator app.</value>
+  </data>
+  <data name="AdminCodeInvalid" xml:space="preserve">
+    <value>That code is not valid right now.</value>
+  </data>
+  <data name="AdminCodeUsed" xml:space="preserve">
+    <value>That code was already used — wait for the next one.</value>
+  </data>
+  <data name="NotSetUpWarning" xml:space="preserve">
+    <value>Digital Aid is not set up on this PC, so it is not enforcing anything.</value>
+  </data>
+  <data name="PairWindowTitle" xml:space="preserve">
+    <value>Digital Aid — pair this PC</value>
+  </data>
+  <data name="PairPrompt" xml:space="preserve">
+    <value>Enter a full server address and the current 6-digit code.</value>
+  </data>
+  <data name="PairServerAddress" xml:space="preserve">
+    <value>Server address</value>
+  </data>
+  <data name="PairPcName" xml:space="preserve">
+    <value>This PC's name</value>
+  </data>
+  <data name="PairAdminCode" xml:space="preserve">
+    <value>Admin Code (6 digits from the authenticator app)</value>
+  </data>
+  <data name="PairButton" xml:space="preserve">
+    <value>Pair</value>
+  </data>
+  <data name="PairInProgress" xml:space="preserve">
+    <value>Pairing…</value>
+  </data>
+  <data name="PairRejected" xml:space="preserve">
+    <value>The server rejected that code. Try the current one.</value>
+  </data>
+  <data name="PairFailed" xml:space="preserve">
+    <value>That did not work — check the code is current and try again.</value>
+  </data>
+  <data name="PairUnreachable" xml:space="preserve">
+    <value>Could not reach the server: {0}</value>
+  </data>
+  <data name="PairAdoptQuestion" xml:space="preserve">
+    <value>This server already knows this PC as “{0}” ({1}).
+
+Reconnect to it? Its history, settings and name are kept.
+
+Choose No to set this up as a separate, new PC.</value>
+  </data>
+  <data name="PairAdoptNeverSeen" xml:space="preserve">
+    <value>it has never reported in</value>
+  </data>
+  <data name="PairAdoptLastSeen" xml:space="preserve">
+    <value>last seen {0}</value>
+  </data>
+  <data name="AboutTitle" xml:space="preserve">
+    <value>About Digital Aid</value>
+  </data>
+  <data name="AboutVersion" xml:space="preserve">
+    <value>Version {0}</value>
+  </data>
+  <data name="AboutVersionUpdated" xml:space="preserve">
+    <value>Version {0} — just updated from {1}</value>
+  </data>
+  <data name="AboutMadeBy" xml:space="preserve">
+    <value>Made by {0} · {1}</value>
+    <comment>{0} author, {1} website.</comment>
+  </data>
+  <data name="AboutOpenSource" xml:space="preserve">
+    <value>Open source ({0}) · {1}</value>
+    <comment>{0} licence, {1} repository.</comment>
+  </data>
+  <data name="AboutLabelServer" xml:space="preserve">
+    <value>Server</value>
+  </data>
+  <data name="AboutLabelClientId" xml:space="preserve">
+    <value>Client id</value>
+  </data>
+  <data name="AboutLabelSetup" xml:space="preserve">
+    <value>Setup</value>
+  </data>
+  <data name="AboutLabelDisabled" xml:space="preserve">
+    <value>Disabled</value>
+  </data>
+  <data name="AboutLabelStoodDown" xml:space="preserve">
+    <value>Stood down</value>
+  </data>
+  <data name="AboutLabelLastSeen" xml:space="preserve">
+    <value>Last seen</value>
+  </data>
+  <data name="AboutLabelAllowance" xml:space="preserve">
+    <value>Allowance</value>
+  </data>
+  <data name="AboutLabelDowntime" xml:space="preserve">
+    <value>Downtime</value>
+  </data>
+  <data name="AboutLabelToday" xml:space="preserve">
+    <value>Today</value>
+  </data>
+  <data name="AboutLabelQueued" xml:space="preserve">
+    <value>Events queued</value>
+  </data>
+  <data name="AboutLabelStateFile" xml:space="preserve">
+    <value>State file</value>
+  </data>
+  <data name="AboutLabelLogFile" xml:space="preserve">
+    <value>Log file</value>
+  </data>
+  <data name="AboutNotPaired" xml:space="preserve">
+    <value>not paired</value>
+  </data>
+  <data name="AboutSetupReady" xml:space="preserve">
+    <value>ready</value>
+  </data>
+  <data name="AboutSetupUnconfigured" xml:space="preserve">
+    <value>not set up — no Admin Code, so nothing is enforced and it exits without a code</value>
+  </data>
+  <data name="AboutYes" xml:space="preserve">
+    <value>yes</value>
+  </data>
+  <data name="AboutNo" xml:space="preserve">
+    <value>no</value>
+  </data>
+  <data name="AboutDisabledYes" xml:space="preserve">
+    <value>yes (paused — enable it from the server)</value>
+  </data>
+  <data name="AboutStoodDownYes" xml:space="preserve">
+    <value>yes — exited with an Admin Code. Ends at midnight, on reboot, or start it by hand.</value>
+  </data>
+  <data name="AboutNeverReached" xml:space="preserve">
+    <value>never reached the server</value>
+  </data>
+  <data name="AboutJustNow" xml:space="preserve">
+    <value>just now</value>
+  </data>
+  <data name="AboutMinutesAgo" xml:space="preserve">
+    <value>{0} min ago</value>
+  </data>
+  <data name="AboutHoursAgo" xml:space="preserve">
+    <value>{0} h ago</value>
+  </data>
+  <data name="AboutDaysAgo" xml:space="preserve">
+    <value>{0} days ago</value>
+  </data>
+  <data name="AboutAllowanceValue" xml:space="preserve">
+    <value>{0} min weekdays, {1} min weekends</value>
+  </data>
+  <data name="AboutTodayValue" xml:space="preserve">
+    <value>{0}, {1} min used, {2} min extra left</value>
+  </data>
+  <data name="StatusBlocked" xml:space="preserve">
+    <value>blocked</value>
+  </data>
+  <data name="BlockReasonUsedUp" xml:space="preserve">
+    <value>Today's screen time is used up. It resets tomorrow.</value>
+  </data>
+  <data name="UnconfiguredStop" xml:space="preserve">
+    <value>Digital Aid is not set up on this PC, so it is not enforcing anything.
+
+Stop it? It will stay off until midnight, the next restart, or you start it by hand.</value>
+  </data>
+  <data name="StatusDisabled" xml:space="preserve">
+    <value>disabled</value>
+  </data>
+</root>

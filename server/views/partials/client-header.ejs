@@ -1,0 +1,65 @@
+<%
+  // Status hero for one Client. Refreshed on a fast tick; read-only, so it may be replaced at any
+  // moment without disturbing the forms below it.
+  const kind = timeLeftKind(client);
+  const used = client.used_today ?? 0;
+  const fmt = (minutes) => minutes >= 60
+    ? t('client.timeHm', [Math.floor(minutes / 60), minutes % 60])
+    : t('client.timeM', [minutes]);
+  const weekend = [0, 6].includes(new Date().getDay());
+  const allowance = weekend ? client.weekend_minutes : client.weekday_minutes;
+%>
+<div class="status-board">
+<div class="hero">
+  <span class="avatar <%= online ? '' : 'off' %>" aria-hidden="true">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="2" y="4" width="20" height="13" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+  </span>
+  <h1>
+    <%= client.name %>
+    <span class="tags">
+      <% if (client.revoked_at) { %><span class="tag revoked"><%= t('badge.revoked') %></span><% } %>
+      <% if (client.disabled) { %><span class="tag disabled"><%= t('badge.disabled') %></span><% } %>
+      <% if (locked) { %><span class="tag locked"><%= t('badge.locked') %></span><% } %>
+      <% if (!client.revoked_at && !client.disabled && kind !== 'unknown') { %>
+        <span class="chip-status s-<%= kind %>"><%= t('kind.' + kind) %></span>
+      <% } %>
+    </span>
+  </h1>
+  <p class="conn">
+    <span class="dot <%= online ? 'online' : '' %>"
+          title="<%= online ? t('conn.connected') : t('conn.notConnected') %>"></span>
+    <span><%= t('header.meta', [
+      client.version ?? '–',
+      client.created_local ?? client.created_at,
+      online ? t('conn.connectedNow')
+             : t('conn.lastSeen', [client.last_seen_local ?? client.last_seen_at ?? t('conn.never')]),
+    ]) %></span>
+  </p>
+
+  <p class="timeleft s-<%= kind %>"><%= timeLeft %></p>
+
+  <%# What this PC is in right now — the last Ping's Foreground App, and only while online. A locked
+      or blocked Client reports none, so this empties rather than holding the last thing it saw.
+      Always rendered, like on the card: this fragment is on a fast tick and a line that comes and
+      goes would shunt the whole page up and down. %>
+  <p class="now-app" title="<%= (online && client.last_app) ? client.last_app : '' %>">
+    <%= (online && client.last_app) ? client.last_app : '–' %>
+  </p>
+
+  <% if (client.protocol != null && client.protocol !== serverProtocol) { %>
+  <p class="warn"><%= t('header.protocolMismatch', [client.protocol, serverProtocol]) %></p>
+  <% } %>
+</div>
+<div class="status-metric">
+  <span><%= t('client.usedToday') %></span>
+  <strong><%= fmt(used) %></strong>
+</div>
+<div class="status-metric">
+  <span><%= t('client.nextDowntime') %></span>
+  <strong><%= client.downtime_start %></strong>
+</div>
+<div class="status-metric">
+  <span><%= t('client.allowanceToday') %></span>
+  <strong><%= fmt(allowance) %></strong>
+</div>
+</div>

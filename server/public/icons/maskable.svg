@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <!-- Full-bleed background; the glyph stays inside the 80% safe zone so Android can crop it. -->
+  <rect width="512" height="512" fill="#1b2334"/>
+  <circle cx="256" cy="256" r="112" fill="none" stroke="#6f9bff" stroke-width="26"/>
+  <path d="M256 183 v78 h63" fill="none" stroke="#ffffff" stroke-width="23"
+        stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

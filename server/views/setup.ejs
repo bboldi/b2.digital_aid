@@ -1,0 +1,17 @@
+<div class="auth-shell">
+<header class="auth-brand">
+  <img src="/public/icons/icon.svg" alt="">
+  <div><p class="eyebrow"><%= t('title.setup') %></p><h1>Digital Aid</h1></div>
+</header>
+<p class="muted"><%= t('setup.lead') %></p>
+<% if (error) { %><p class="error" role="alert"><%= error %></p><% } %>
+
+<article>
+  <form method="post" action="/setup">
+    <label><%= t('login.username') %> <input name="username" autocomplete="username" required autofocus></label>
+    <label><%= t('login.password') %> <input name="password" type="password" autocomplete="new-password" required></label>
+    <label><%= t('setup.repeatPassword') %> <input name="password2" type="password" autocomplete="new-password" required></label>
+    <button class="wide"><%= t('setup.submit') %></button>
+  </form>
+</article>
+</div>

@@ -1,0 +1,62 @@
+<%
+  // The open queue, and nothing else — the answered ones live in request-history.ejs, which is not
+  // refreshed and is paged. Rendered by the page and by the fragment route that refreshes it, so
+  // there is one copy of this markup — but note the forms: unlike the Clients grid, this region
+  // *does* carry inputs, so it refreshes slowly (a parent half-way through typing 45 must not lose
+  // it) and the minutes box is keyed by request id so a replaced node is a genuinely different
+  // Request.
+  const ago = (local) => (local ? String(local).slice(11, 16) : '—');
+  const connected = Object.values(online).filter(Boolean).length;
+  const offlineOpen = open.filter((r) => !online[r.client_id]).length;
+%>
+
+<section class="dashboard-overview request-overview" aria-label="<%= t('requests.overview') %>">
+  <div class="overview-tile overview-primary">
+    <span class="metric-label"><%= t('requests.waiting') %></span>
+    <strong class="metric-value"><%= open.length %></strong>
+    <span class="metric-note"><%= t('requests.waitingNote') %></span>
+  </div>
+  <div class="overview-secondary">
+    <div class="overview-tile overview-mini">
+      <span class="metric-label"><%= t('requests.connectedClients') %></span>
+      <strong class="metric-value"><%= connected %></strong>
+      <span class="metric-note"><%= t('requests.connectedNote') %></span>
+    </div>
+    <div class="overview-tile overview-mini">
+      <span class="metric-label"><%= t('requests.offlineRequests') %></span>
+      <strong class="metric-value"><%= offlineOpen %></strong>
+      <span class="metric-note"><%= t('requests.offlineRequestsNote') %></span>
+    </div>
+  </div>
+</section>
+
+<div class="request-grid">
+
+<% if (open.length === 0) { %>
+  <article class="quiet-empty wide">
+    <p><%= t('req.noneOpen') %></p>
+    <p class="muted"><small><%= t('req.noneOpenNote') %></small></p>
+  </article>
+<% } %>
+
+<% for (const r of open) { %>
+  <article class="request" data-live-key="req-<%= r.id %>">
+    <header>
+      <strong><%= r.client_name %></strong>
+      <span class="muted"><small><%= t('req.askedAt', [r.asked_minutes, ago(r.created_local), ago(r.expires_local)]) %></small></span>
+      <% if (!online[r.client_id]) { %>
+        <span class="tag offline" title="<%= t('req.offlineTitle') %>"><%= t('req.offline') %></span>
+      <% } %>
+    </header>
+    <form method="post" action="/requests/<%= r.id %>/decide" class="decide">
+      <%# Pre-filled with what was asked, because that is the answer most of the time — but it is a
+          plain number box, because the asked minutes are advisory and the Admin picks the real ones. %>
+      <input type="number" name="minutes" min="1" max="<%= maxAsk %>" value="<%= r.asked_minutes %>"
+             aria-label="<%= t('req.minutesLabel', [r.client_name]) %>">
+      <button name="decision" value="approve"><%= t('req.approve') %></button>
+      <button name="decision" value="decline" class="danger" formnovalidate><%= t('req.decline') %></button>
+    </form>
+    <p class="muted"><small><%= t('req.declineNote') %></small></p>
+  </article>
+<% } %>
+</div>

@@ -1,0 +1,72 @@
+<%
+  // Proving the Admin Code exists somewhere other than this server (ADR-0010).
+  //
+  // Renders the QR and the secret but deliberately **never a current code**: there must be nothing
+  // on this page to copy into the box, or typing one back proves only that the admin can read.
+  //
+  // No nav chrome. The tab bar would be an escape route, and this screen is the one place in the app
+  // that is not optional — the secret on it is provisional until something below happens to it.
+%>
+<div class="auth-shell auth-wide">
+<header class="auth-brand">
+  <img src="/public/icons/icon.svg" alt="">
+  <div><p class="eyebrow"><%= t('title.codes') %></p><h1><%= t('prove.title') %></h1></div>
+</header>
+
+<% if (error) { %><p class="error" role="alert"><%= error %></p><% } %>
+
+<article>
+  <p><strong><%= t('prove.lead') %></strong> <%= t('prove.leadRest') %></p>
+
+  <img src="<%= qr %>" alt="<%= t('prove.qrAlt') %>" width="240" height="240" style="max-width:100%;height:auto">
+  <p class="mono"><%= secret %></p>
+  <p class="muted"><small><%- t('prove.backupNote', ['<strong>' + t('prove.adminCode') + '</strong>']) %></small></p>
+
+  <%# The reason this screen exists, in the words of the night it matters. %>
+  <p class="warn-note"><%= t('prove.warn') %></p>
+
+  <form method="post" action="/admin-code/confirm">
+    <label><%= t('prove.codeLabel') %>
+      <input type="text" name="code" inputmode="numeric" autocomplete="one-time-code"
+             maxlength="6" pattern="\d{6}" required autofocus>
+    </label>
+    <button><%= t('prove.confirm') %></button>
+  </form>
+</article>
+
+<article>
+  <%# One click of friction, on purpose: enough to separate "deliberate" from "impatient". %>
+  <details>
+    <summary><%= t('prove.skipSummary') %></summary>
+
+    <p class="muted"><small><%= t('prove.skipNote') %></small></p>
+
+    <form method="post" action="/admin-code/confirm">
+      <input type="hidden" name="skip" value="1">
+      <label>
+        <input type="checkbox" name="acknowledged" value="1">
+        <%= t('prove.skipAck') %>
+      </label>
+      <button class="quiet"><%= t('prove.skipSubmit') %></button>
+    </form>
+  </details>
+</article>
+
+<article>
+  <% if (firstRun) { %>
+    <%# Nothing is in force yet, so starting again costs nothing. Covers the two real failures: a bad
+        scan, and the wrong entry tapped in the authenticator app. %>
+    <h2><%= t('prove.restartTitle') %></h2>
+    <p class="muted"><small><%= t('prove.restartNote') %></small></p>
+    <form method="post" action="/admin-code/restart">
+      <button class="quiet"><%= t('prove.restartSubmit') %></button>
+    </form>
+  <% } else { %>
+    <h2><%= t('prove.cancelTitle') %></h2>
+    <p class="muted"><small><%= t('prove.cancelNote') %></small></p>
+    <form method="post" action="/admin-code/cancel">
+      <button class="quiet"><%= t('prove.cancelSubmit') %></button>
+    </form>
+  <% } %>
+</article>
+</div>

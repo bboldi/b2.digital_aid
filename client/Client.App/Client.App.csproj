@@ -1,0 +1,38 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <!-- WinForms comes along only for NotifyIcon (tray) and Screen (monitor enumeration). -->
+    <UseWindowsForms>true</UseWindowsForms>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>DigitalAid.Client.App</RootNamespace>
+    <AssemblyName>DigitalAid</AssemblyName>
+    <!-- Lets the Windows-only shell build (and publish win-x64) from the Linux dev box. -->
+    <EnableWindowsTargeting>true</EnableWindowsTargeting>
+    <!-- Version comes from ../VERSION via ../Directory.Build.props — do not set it here. -->
+    <!-- Required by the LibraryImport source generator. -->
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <!-- Set here rather than in the manifest: the WinForms analyzer (WFO0003) requires it. -->
+    <ApplicationHighDpiMode>PerMonitorV2</ApplicationHighDpiMode>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- WinForms is here for NotifyIcon and Screen only, but its implicit usings collide with WPF
+         (Application, TextBox, Button, Color, Brushes...), so both are dropped and those few types
+         are fully qualified. Enabling WinForms also drops System.IO/System.Net.Http from the
+         default implicit set, hence the two Includes. -->
+    <Using Remove="System.Windows.Forms" />
+    <Using Remove="System.Drawing" />
+    <Using Include="System.IO" />
+    <Using Include="System.Net.Http" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../Client.Core/Client.Core.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,108 @@
+<%
+  // The three things a parent reaches for mid-evening, above the fold. Deliberately a *duplicate*:
+  // the Actions card lower down keeps its own Lock, message and adjust boxes, because the rest of
+  // that card (rename, disable, revoke, delete) must not migrate up here next to them.
+  //
+  // Buttons open a dialog each rather than carrying inline controls: on a phone the inline row read
+  // as a form, and the two-tap shape (button, then one decision) is how every comparable app does
+  // it. Lock is the exception twice over — locking asks a dialog's confirmation because it blocks
+  // the PC instantly, while *un*locking posts straight away: it only ever gives back.
+  //
+  // No new routes — Give time is a positive Adjustment (CONTEXT.md: Adjustment), so it posts the
+  // chosen minutes to the same handler the +/- box uses.
+  //
+  // The presets are the household's, the same five the Extra Time Code page offers, so "how much
+  // time we give" reads the same wherever it is asked. The remembered choice is *not* shared with
+  // that page: picking 60 to read down the phone should not change what this dropdown opens on.
+  const PRESETS = [10, 15, 30, 45, 60];
+%>
+
+<article class="quick">
+  <h2><%= t('client.quickTitle') %> <small class="muted"><%= t('client.actionsNote') %></small></h2>
+
+  <div class="quick-grid">
+    <button type="button" class="quick-btn" data-dialog="dlg-give"
+            data-online-only <%= online ? '' : 'disabled' %>>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+        <circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/>
+      </svg>
+      <%= t('client.giveTime') %>
+    </button>
+
+    <button type="button" class="quick-btn" data-dialog="dlg-message"
+            data-online-only <%= online ? '' : 'disabled' %>>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+           stroke-linejoin="round" aria-hidden="true">
+        <path d="M22 2 11 13"/><path d="M22 2 15 22l-4-9-9-4z"/>
+      </svg>
+      <%= t('client.message') %>
+    </button>
+
+    <%# Lock is a toggle (CONTEXT.md: Lock), and so is its icon: an open shackle for the button that
+        would unlock. Unlocking is a straight post — a dialog before giving time back would only
+        make the parent read a warning about the thing they are undoing. %>
+    <% if (locked) { %>
+      <form method="post" action="/clients/<%= client.id %>/lock" class="quick-cell">
+        <button class="quick-btn" data-online-only <%= online ? '' : 'disabled' %>>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+               stroke-linecap="round" aria-hidden="true">
+            <rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 7.5-2"/>
+          </svg>
+          <%= t('client.unlock') %>
+        </button>
+      </form>
+    <% } else { %>
+      <button type="button" class="quick-btn danger" data-dialog="dlg-lock"
+              data-online-only <%= online ? '' : 'disabled' %>>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+             stroke-linecap="round" aria-hidden="true">
+          <rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/>
+        </svg>
+        <%= t('client.lockNow') %>
+      </button>
+    <% } %>
+  </div>
+</article>
+
+<dialog id="dlg-give" aria-labelledby="dlg-give-title">
+  <form method="post" action="/clients/<%= client.id %>/adjust">
+    <h2 id="dlg-give-title"><%= t('client.giveTime') %></h2>
+    <label><%= t('client.quickMinutesLabel') %>
+      <select name="minutes" id="quick-minutes">
+        <% for (const m of PRESETS) { %>
+          <option value="<%= m %>"><%= t('client.quickMinutes', [m]) %></option>
+        <% } %>
+      </select>
+    </label>
+    <footer class="dlg-actions">
+      <button type="button" class="quiet" data-close><%= t('common.cancel') %></button>
+      <button data-online-only <%= online ? '' : 'disabled' %>><%= t('client.giveTime') %></button>
+    </footer>
+  </form>
+</dialog>
+
+<dialog id="dlg-message" aria-labelledby="dlg-message-title">
+  <form method="post" action="/clients/<%= client.id %>/message">
+    <h2 id="dlg-message-title"><%= t('client.message') %></h2>
+    <label><%= t('client.message') %>
+      <input name="text" list="message-templates-list" placeholder="<%= t('client.messagePlaceholder') %>" required>
+    </label>
+    <footer class="dlg-actions">
+      <button type="button" class="quiet" data-close><%= t('common.cancel') %></button>
+      <button data-online-only <%= online ? '' : 'disabled' %>><%= t('client.send') %></button>
+    </footer>
+  </form>
+</dialog>
+
+<% if (!locked) { %>
+<dialog id="dlg-lock" aria-labelledby="dlg-lock-title">
+  <form method="post" action="/clients/<%= client.id %>/lock">
+    <h2 id="dlg-lock-title"><%= t('client.lockNow') %></h2>
+    <p class="muted"><small><%= t('client.lockNote') %></small></p>
+    <footer class="dlg-actions">
+      <button type="button" class="quiet" data-close><%= t('common.cancel') %></button>
+      <button class="danger" data-online-only <%= online ? '' : 'disabled' %>><%= t('client.lockNow') %></button>
+    </footer>
+  </form>
+</dialog>
+<% } %>

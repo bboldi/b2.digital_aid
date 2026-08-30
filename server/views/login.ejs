@@ -1,0 +1,30 @@
+<div class="auth-shell">
+<header class="auth-brand">
+  <img src="/public/icons/icon.svg" alt="">
+  <div><p class="eyebrow"><%= t('title.login') %></p><h1>Digital Aid</h1></div>
+</header>
+<p class="muted"><%= t('login.lead') %></p>
+
+<% if (error) { %><p class="error" role="alert"><%= error %></p><% } %>
+
+<article>
+  <form method="post" action="/login">
+    <label><%= t('login.username') %> <input name="username" autocomplete="username" required autofocus></label>
+    <label><%= t('login.password') %> <input name="password" type="password" autocomplete="current-password" required></label>
+    <label>
+      <input type="checkbox" name="remember" role="switch">
+      <%= t('login.remember') %>
+    </label>
+    <button class="wide"><%= t('login.submit') %></button>
+  </form>
+  <p class="muted"><small><%= t('login.rememberNote') %></small></p>
+</article>
+
+<%
+  // Only offered when there is actually a kit to download (ADR-0015). The page itself never 404s —
+  // a bookmark keeps working and explains itself — but there is no reason to advertise an empty one.
+%>
+<% if (hasKit) { %>
+  <p class="muted"><small><a href="/download"><%= t('login.download') %></a></small></p>
+<% } %>
+</div>

@@ -1,0 +1,43 @@
+<%
+  // One Block Screen Background slot, on either page. `scope` is 'global' or a Client id; `own` is
+  // what is set at this scope, `resolved` is what the PC will actually show (identical at global
+  // scope, which is why it defaults to `own`).
+  //
+  // The preview always shows `resolved`, never `own`. An override and an inherited picture look the
+  // same to a kid, and a page that only admits to the former leaves "which picture is on which
+  // machine" unanswerable.
+  const label = t(slot === 'blocked' ? 'bg.blockedLabel' : 'bg.downtimeLabel');
+  const blurb = t(slot === 'blocked' ? 'bg.blockedBlurb' : 'bg.downtimeBlurb');
+  const shown = typeof resolved === 'undefined' ? own : resolved;
+  const inherited = shown && !own;
+%>
+
+<div class="bg-slot">
+  <h4><%= label %></h4>
+  <p class="muted"><small><%= blurb %></small></p>
+
+  <% if (shown) { %>
+    <img class="bg-thumb" alt="<%= t('bg.alt', [label]) %>"
+         src="/background/<%= scope %>/<%= slot %>/image?resolved=1&v=<%= shown.sha256.slice(0, 12) %>">
+    <p class="muted"><small>
+      <% if (inherited) { %><%= t('bg.inherited') %><% } else { %><%= t('bg.own') %><% } %>
+      <%= t('bg.kb', [Math.round(shown.bytes / 1024)]) %>
+    </small></p>
+  <% } else { %>
+    <div class="bg-thumb bg-thumb-empty" aria-hidden="true"></div>
+    <p class="muted"><small><%= t('bg.none') %></small></p>
+  <% } %>
+
+  <form method="post" action="/background/<%= scope %>/<%= slot %>" enctype="multipart/form-data">
+    <label>
+      <input type="file" name="image" accept="image/jpeg,image/png" required>
+    </label>
+    <button><%= own ? t('bg.replace') : (inherited ? t('bg.override') : t('bg.upload')) %></button>
+  </form>
+
+  <% if (own) { %>
+  <form method="post" action="/background/<%= scope %>/<%= slot %>/remove">
+    <button class="quiet"><%= scope === 'global' ? t('bg.remove') : t('bg.removeOverride') %></button>
+  </form>
+  <% } %>
+</div>

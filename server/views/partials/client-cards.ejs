@@ -1,0 +1,98 @@
+<%
+  // The Clients grid. Rendered both by the full page and by the fragment route that refreshes it,
+  // so there is exactly one copy of this markup. Read-only throughout — polling may replace it
+  // wholesale without ever touching a form the Admin might be typing into.
+  const hhmm = (local) => (local ? String(local).slice(11, 16) : null);
+  // Usage Time so far today. Counted forward from pings, so it is what the machine actually
+  // reported rather than allowance-minus-remaining — those differ once a Grant or an Adjustment is
+  // in play, and the honest number is the one that came off the PC.
+  const usedToday = (m) => (m >= 60
+    ? t('card.usedTodayHm', [Math.floor(m / 60), m % 60])
+    : t('card.usedTodayM', [m]));
+  // Ribbon colours share the timeline's vocabulary (client-day.ejs) via the CSS variables, so a
+  // colour means the same thing on the card as on the Client Page.
+  const segVar = { 'active': '--da-active', 'grant-active': '--da-grant', 'locked': '--da-locked', 'blocked': '--da-blocked' };
+  const onlineCount = clients.filter((c) => c.online).length;
+  const totalUsed = clients.reduce((sum, c) => sum + (c.used_today ?? 0), 0);
+  const totalUsedText = totalUsed >= 60
+    ? t('client.timeHm', [Math.floor(totalUsed / 60), totalUsed % 60])
+    : t('client.timeM', [totalUsed]);
+%>
+<section class="dashboard-overview" aria-label="<%= t('clients.overview') %>">
+  <div class="overview-tile overview-primary">
+    <span class="metric-label"><%= t('clients.usedAcross') %></span>
+    <strong class="metric-value"><%= totalUsedText %></strong>
+    <span class="metric-note"><%= t('clients.acrossClients', [clients.length]) %></span>
+  </div>
+  <div class="overview-secondary">
+    <div class="overview-tile overview-mini">
+      <span class="metric-label"><%= t('clients.online') %></span>
+      <strong class="metric-value"><%= onlineCount %>/<%= clients.length %></strong>
+      <span class="metric-note"><%= t('clients.onlineNote') %></span>
+    </div>
+    <div class="overview-tile overview-mini">
+      <span class="metric-label"><%= t('clients.offline') %></span>
+      <strong class="metric-value"><%= clients.length - onlineCount %></strong>
+      <span class="metric-note"><%= t('clients.offlineNote') %></span>
+    </div>
+  </div>
+</section>
+
+<div class="section-heading">
+  <h2><%= t('clients.title') %></h2>
+</div>
+<div class="client-grid" id="client-grid">
+<% for (const c of clients) { const kind = timeLeftKind(c); %>
+  <a class="client-card <%= c.online ? 'is-online' : 'is-offline' %> <%= c.revoked_at ? 'is-revoked' : '' %>"
+     href="/clients/<%= c.id %>">
+    <%# Name row and connectivity line are separate rows on purpose: a long version string gets the
+        whole card width instead of wrapping in a cramped column beside the avatar, and every card's
+        head is the same height, so a grid of them lines up. %>
+    <div class="head">
+      <span class="avatar <%= c.online ? '' : 'off' %>" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="2" y="4" width="20" height="13" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+      </span>
+      <span class="name"><%= c.name %></span>
+      <% if (c.revoked_at) { %><span class="tag revoked"><%= t('badge.revoked') %></span>
+      <% } else if (c.disabled) { %><span class="tag disabled"><%= t('badge.disabled') %></span>
+      <% } else if (kind !== 'unknown') { %><span class="chip-status s-<%= kind %>"><%= t('kind.' + kind) %></span><% } %>
+    </div>
+    <p class="conn">
+      <span class="dot <%= c.online ? 'online' : '' %>"
+            title="<%= c.online ? t('conn.connected') : t('conn.notConnected') %>"></span>
+      <%# Offline numbers are last-known, so the line says when. Stale-but-labelled beats a
+          confident lie. %>
+      <span><%= c.online ? t('conn.connectedNow')
+                         : (hhmm(c.last_seen_local) ? t('conn.asOf', [hhmm(c.last_seen_local)]) : t('conn.neverSeen')) %>
+            · <%= c.version ?? t('card.noVersion') %>
+        <% if (c.protocol != null && c.protocol !== serverProtocol) { %>
+          <span class="warn" title="<%= t('card.protocolTitle', [c.protocol, serverProtocol]) %>"><%= t('card.protocolShort', [c.protocol]) %></span>
+        <% } %>
+      </span>
+    </p>
+
+    <p class="timeleft s-<%= kind %>"><%= timeLeftText(c, t) %></p>
+
+    <%# What the machine is in right now. Only ever the last Ping's value while the Client is online:
+        the Client sends none while locked or blocked, and `last_app` is assigned (not coalesced) on
+        every Ping, so it genuinely clears rather than going stale. The row is rendered whether or not
+        there is anything to put in it — the grid re-renders wholesale every five seconds, and a row
+        that appears and vanishes as the kid clicks the desktop would make the cards twitch. %>
+    <p class="now-app" title="<%= (c.online && c.last_app) ? c.last_app : '' %>">
+      <%= (c.online && c.last_app) ? c.last_app : '–' %>
+    </p>
+
+    <p class="used-note"><%= usedToday(c.used_today ?? 0) %></p>
+
+    <div class="ribbon">
+      <svg viewBox="0 0 1440 20" preserveAspectRatio="none" role="img" aria-label="<%= t('card.ribbonAlt') %>">
+        <rect x="0" y="0" width="1440" height="20" fill="var(--da-off)"/>
+        <% for (const s of (c.segments ?? [])) { %>
+          <rect x="<%= s.start %>" y="0" width="<%= s.len %>" height="20" fill="var(<%= segVar[s.status] || '--da-locked' %>)"/>
+        <% } %>
+      </svg>
+      <div class="ribbon-scale" aria-hidden="true"><span>00</span><span>06</span><span>12</span><span>18</span><span>24</span></div>
+    </div>
+  </a>
+<% } %>
+</div>

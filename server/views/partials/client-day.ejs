@@ -1,0 +1,110 @@
+<%
+  // One day of usage for one Client: minute timeline with event marks, hourly bars, apps. Rendered by
+  // both the full page and the refresh route, so this markup exists once. Refreshed no faster than
+  // once a minute — pings arrive one a minute, so anything quicker re-fetches identical bytes.
+  const statusColor = { 'active': 'var(--da-active)', 'grant-active': 'var(--da-grant)', 'locked': 'var(--da-locked)', 'blocked': 'var(--da-blocked)' };
+  const fmtMin = (m) => (m >= 60 ? t('fmt.hm', [Math.floor(m / 60), m % 60]) : t('fmt.m', [m]));
+  const today = new Date().toLocaleDateString('en-CA');
+
+  // --- Event markers -----------------------------------------------------------------------------
+  // The timeline is 1440 units wide — one per minute — and on a phone it renders into roughly 400px,
+  // so about 3.6 minutes share every pixel. Two events ten minutes apart land on the same spot, and
+  // a bad evening (exit, restart, unclean exit, a code redeemed) is exactly when they cluster. Marks
+  // are therefore merged rather than drawn on top of each other: overlapping ticks would make the
+  // worst evenings look like the quietest, which is the one failure this must not have.
+  const MERGE_WITHIN = 24;          // minutes; ~6px at phone width
+  // Event types are translated through v(), which falls back to the raw type for anything this
+  // server has not learned — an Event from a newer Client keeps its own word rather than becoming a
+  // bracketed apology on the one screen that exists to be evidence.
+  const eventLabel = (type) => v('event', type);
+  // Severity decides a merged mark's colour: the loudest thing in the group is what the eye should
+  // be drawn to, and the tooltip still lists everything.
+  const eventRank = { 'exit-via-code': 3, 'unclean-exit': 3, 'disabled': 2, 'clock-jump': 2, 'grant-redeemed': 1 };
+  const rankColor = { 3: 'var(--da-blocked)', 2: 'var(--da-warn-fg)', 1: 'var(--da-grant)' };
+
+  const marks = [];
+  for (const e of (events ?? [])) {
+    const last = marks.at(-1);
+    if (last && e.minute - last.first <= MERGE_WITHIN) last.items.push(e);
+    else marks.push({ first: e.minute, items: [e] });
+  }
+  for (const m of marks) {
+    m.at = Math.round(m.items.reduce((sum, e) => sum + e.minute, 0) / m.items.length);
+    m.rank = Math.max(...m.items.map((e) => eventRank[e.type] ?? 1));
+    m.title = m.items
+      .map((e) => `${String(e.client_ts).slice(11, 16)} — ${eventLabel(e.type)}`)
+      .join('\n');
+  }
+%>
+
+<article>
+  <div class="day-head">
+    <h2><%= t('day.title', [day.date]) %></h2>
+    <form method="get" action="/clients/<%= client.id %>" class="inline">
+      <input type="date" name="date" value="<%= day.date %>" max="<%= today %>" onchange="this.form.submit()">
+    </form>
+  </div>
+  <p class="muted day-used"><%= t('day.usedThisDay', [fmtMin(day.totalUsableMinutes)]) %></p>
+
+  <!-- Minute timeline: one SVG, run-length-encoded rects. Gaps = PC off/offline. -->
+  <div class="scroll-x">
+    <svg viewBox="0 0 1440 56" preserveAspectRatio="none" class="timeline" role="img" aria-label="24-hour timeline">
+      <rect x="0" y="8" width="1440" height="24" fill="var(--da-off)"/>
+      <% for (const s of day.segments) { %>
+        <rect x="<%= s.start %>" y="8" width="<%= s.len %>" height="24" fill="<%= statusColor[s.status] || 'var(--da-axis)' %>"><title><%= v('status', s.status) %></title></rect>
+      <% } %>
+      <% for (let h = 0; h <= 24; h += 3) { %>
+        <line x1="<%= h*60 %>" y1="6" x2="<%= h*60 %>" y2="34" stroke="var(--da-axis)" stroke-width="1"/>
+        <text x="<%= Math.min(h*60+2, 1430) %>" y="6" font-size="9" fill="var(--da-axis)"><%= String(h).padStart(2,'0') %></text>
+      <% } %>
+      <%# Marks sit in their own band under the bar, wide enough to survive being squeezed to phone
+          width. preserveAspectRatio="none" stretches them horizontally with everything else. %>
+      <% for (const m of marks) { %>
+        <rect x="<%= Math.max(0, Math.min(1422, m.at - 9)) %>" y="38" width="18" height="10" rx="3"
+              fill="<%= rankColor[m.rank] %>"><title><%= m.title %></title></rect>
+      <% } %>
+    </svg>
+  </div>
+  <p class="legend">
+    <span><span class="sw" style="background:var(--da-active)"></span> <%= v('status', 'active') %></span>
+    <span><span class="sw" style="background:var(--da-grant)"></span> <%= v('status', 'grant-active') %></span>
+    <span><span class="sw" style="background:var(--da-locked)"></span> <%= v('status', 'locked') %></span>
+    <span><span class="sw" style="background:var(--da-blocked)"></span> <%= v('status', 'blocked') %></span>
+    <span><span class="sw" style="background:var(--da-off);border:1px solid var(--da-axis)"></span> <%= t('legend.off') %></span>
+    <% if (marks.length) { %><span class="legend-sep"><span class="sw mark"></span> <%= t('legend.event') %></span><% } %>
+  </p>
+
+  <!-- Hourly bars: usable (green) stacked over blocked (red). -->
+  <div class="scroll-x">
+    <svg viewBox="0 0 1440 140" preserveAspectRatio="none" class="bars" role="img" aria-label="Hourly usage">
+      <% for (const h of day.hours) { const x = h.hour*60;
+           const ah = (h.active/60)*110, bh = (h.blocked/60)*110; %>
+        <rect x="<%= x+6 %>" y="<%= 120-ah %>" width="48" height="<%= ah %>" fill="var(--da-active)"><title><%= t('day.hourUsed', [h.hour, h.active]) %></title></rect>
+        <rect x="<%= x+6 %>" y="<%= 120-ah-bh %>" width="48" height="<%= bh %>" fill="var(--da-blocked)" opacity="0.5"><title><%= t('day.hourBlocked', [h.blocked]) %></title></rect>
+        <% if (h.hour % 3 === 0) { %><text x="<%= x+6 %>" y="134" font-size="9" fill="var(--da-axis)"><%= h.hour %></text><% } %>
+      <% } %>
+    </svg>
+  </div>
+
+  <% if (day.apps.length) { %>
+  <h3><%= t('day.apps') %></h3>
+  <div class="apps">
+    <% const top = day.apps.slice(0, 10); const maxApp = top[0].minutes; %>
+    <% for (const a of top) { %>
+      <div class="app-row">
+        <span class="app-name" title="<%= a.app %>"><%= a.app %></span>
+        <span class="app-bar"><b style="width:<%= Math.round(a.minutes/maxApp*100) %>%"></b></span>
+        <span class="app-min"><%= fmtMin(a.minutes) %></span>
+      </div>
+    <% } %>
+  </div>
+  <% } else { %><p class="muted"><small><%= t('day.noApps') %></small></p><% } %>
+
+  <%# The events themselves live on the logs page now. What stays here is the mark on the timeline —
+      "something happened at 21:14, and here is what" — which is the part worth seeing without
+      asking for it. Events rather than Pings: Pings are the raw firehose, Events are what anyone
+      actually comes here for. %>
+  <p class="day-foot">
+    <a href="/clients/<%= client.id %>/logs?tab=events" role="button" class="quiet"><%= t('day.viewLogs') %></a>
+  </p>
+</article>

@@ -1,0 +1,49 @@
+<!doctype html>
+<!--
+  The service worker's fallback. It is cached bytes, served with no server involved, so there is
+  nobody to resolve a language: the one page in the app that cannot be translated on request is
+  bilingual instead. It is also short, and it is only ever read during an outage — two sections is a
+  smaller cost than a page that arrives in the wrong language on the one occasion it matters.
+-->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Offline · Digital Aid</title>
+  <link rel="stylesheet" href="/public/vendor/beer.min.css">
+  <link rel="stylesheet" href="/public/style.css">
+</head>
+<body>
+  <main class="shell">
+    <div class="auth-shell auth-wide">
+    <header class="auth-brand">
+      <img src="/public/icons/icon.svg" alt="">
+      <div><p class="eyebrow">Offline · kapcsolat nélkül</p><h1>Digital Aid</h1></div>
+    </header>
+    <div class="bento-grid">
+    <article>
+      <h1>Can't reach the server</h1>
+      <p>Usage and settings are live, so there is nothing to show for them while the server is
+         unreachable.</p>
+      <p><a href="/family-code" role="button">Open the Admin Code</a></p>
+      <p><small>That page keeps working if you have trusted this device — it works out codes here, so
+         you can still give a PC extra time. The clients keep enforcing their limits on their own
+         meanwhile, so nothing is lost; the timeline fills in once they reconnect.</small></p>
+      <p><a href="/">Try again</a></p>
+    </article>
+
+    <article lang="hu">
+      <h1>A szerver nem érhető el</h1>
+      <p>A használat és a beállítások élő adatok, így amíg a szerver elérhetetlen, nincs mit mutatni
+         belőlük.</p>
+      <p><a href="/family-code" role="button">Adminkód megnyitása</a></p>
+      <p><small>Az az oldal továbbra is működik, ha megbíztál ebben az eszközben — a kódokat itt
+         számolja ki, így extra időt is tudsz adni egy gépnek. A gépek közben önállóan tovább
+         korlátoznak, tehát semmi nem vész el; az idővonal kitöltődik, amint újra csatlakoznak.</small></p>
+      <p><a href="/">Újrapróbálkozás</a></p>
+    </article>
+    </div>
+    </div>
+  </main>
+</body>
+</html>
