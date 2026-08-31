@@ -59,6 +59,12 @@
   <data name="TrayEnterCode" xml:space="preserve">
     <value>Enter extra time code…</value>
   </data>
+  <data name="TrayUsageReport" xml:space="preserve">
+    <value>Usage report</value>
+  </data>
+  <data name="TrayReportDays" xml:space="preserve">
+    <value>Last {0} days</value>
+  </data>
   <data name="TrayLockScreen" xml:space="preserve">
     <value>Lock the screen</value>
   </data>
@@ -124,6 +130,15 @@
   </data>
   <data name="StatusDisconnected" xml:space="preserve">
     <value> (disconnected by parent)</value>
+  </data>
+  <data name="ReportUnavailable" xml:space="preserve">
+    <value>Could not open the usage report. Try again when the server is connected.</value>
+  </data>
+  <data name="ReportUnsupported" xml:space="preserve">
+    <value>This server does not support usage reports yet.</value>
+  </data>
+  <data name="ReportBrowserFailed" xml:space="preserve">
+    <value>Windows could not open the usage report in your browser.</value>
   </data>
   <data name="TrayTooltip" xml:space="preserve">
     <value>Digital Aid — {0}{1}</value>

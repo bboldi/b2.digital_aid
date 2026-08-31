@@ -7,7 +7,7 @@ namespace DigitalAid.Client.Core;
 /// <summary>Wire protocol generation. PROTOCOL.md is the authority — bump both together.</summary>
 public static class Protocol
 {
-    public const int Version = 4;
+    public const int Version = 5;
 
     /// <summary>Ping status vocabulary (PROTOCOL §7.1).</summary>
     public static string StatusOf(EnforcementState state) => state switch
@@ -78,6 +78,10 @@ public abstract record ServerMessage
     /// <summary>The answer to a <c>coupon</c> message (PROTOCOL §6.10). <c>Minutes</c> is only
     /// meaningful with <see cref="CouponState.Granted"/>.</summary>
     public sealed record CouponStatus(CouponState State, int Minutes) : ServerMessage;
+
+    /// <summary>The correlated answer to a Usage Report request. A null path means the server no
+    /// longer accepts this Client credential or refused the requested period.</summary>
+    public sealed record ReportLink(string RequestId, string? Path) : ServerMessage;
 
     /// <summary>An unrecognised or malformed message. Logged and ignored, never fatal (PROTOCOL §1) —
     /// this is what lets an older Client keep talking to a newer server.</summary>
@@ -207,6 +211,10 @@ public static class ServerMessageParser
                     },
                     obj["minutes"]?.GetValue<int>() ?? 0),
 
+                "report-link" => obj["requestId"]?.GetValue<string>() is { Length: > 0 } requestId
+                    ? new ServerMessage.ReportLink(requestId, obj["path"]?.GetValue<string>())
+                    : new ServerMessage.Unsupported(type, "missing request id"),
+
                 "update" => ReadUpdate(obj) is { } u
                     ? new ServerMessage.UpdateAvailable(u)
                     : new ServerMessage.Unsupported(type, "missing update fields"),
@@ -290,6 +298,9 @@ public static class ClientMessages
     public static string Coupon(string code) =>
         JsonSerializer.Serialize(new CouponDto(code), Options);
 
+    public static string ReportLink(string requestId, int days) =>
+        JsonSerializer.Serialize(new ReportLinkDto(requestId, days), Options);
+
     public static string Events(IReadOnlyList<ClientEvent> events) =>
         JsonSerializer.Serialize(new EventsDto(events), Options);
 
@@ -329,6 +340,13 @@ public static class ClientMessages
     private sealed record CouponDto([property: JsonPropertyName("code")] string Code)
     {
         [JsonPropertyName("type")] public string Type => "coupon";
+    }
+
+    private sealed record ReportLinkDto(
+        [property: JsonPropertyName("requestId")] string RequestId,
+        [property: JsonPropertyName("days")] int Days)
+    {
+        [JsonPropertyName("type")] public string Type => "report-link-request";
     }
 
     private sealed record PairRequestDto(

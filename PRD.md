@@ -54,6 +54,7 @@ usable and *for how long*; both surfaces render from that rather than summing al
 | **Server Key** | Server DB (plain) | Signs Admin session cookies. Nothing else. Rotation just logs the admin out. |
 | **Family Code secret** | Server DB + every Client (obfuscated at rest, e.g. DPAPI) | TOTP secret behind the 6-digit **Family Codes**. One shared secret for the household — one authenticator entry. Shown once at setup as QR + base32 string. |
 | **Client Token** | Client (local) + server (hashed) | Permanent per-Client credential issued at pairing; authenticates the WebSocket. |
+| **Report Link** | Server memory (hashed) + opened browser | Temporary 30-minute capability for one Client and one Usage Report period; never grants control or Admin access. |
 
 **Family Codes** (standard TOTP, 6 digits, 30 s step) prove in-the-moment parental intent. They are used for: pairing a new Client, Grants, and exiting the client app. Verification happens *on the client* for Grants/exit (works offline — this is why every Client stores the secret) and on the server for pairing.
 
@@ -216,7 +217,8 @@ by the parent (`winget install Microsoft.DotNet.DesktopRuntime.10`).
   arrives as a Grant and lifts the Block Screen immediately; a decline arrives as a message that must be
   dismissed, followed by a 15-minute quiet period before asking again.
 - **Shut down:** a Block Screen button, no code required. A kid can hold the power button anyway, so gating it would be theatre, and a clean shutdown logs `os-shutdown` where a held power button logs `unclean-exit`.
-- **Flyout** (tray click): remaining time today, next Downtime, and the same per-app usage picture the parent sees.
+- **Flyout** (tray click): remaining time today and next Downtime.
+- **Usage Report** (tray submenu): the same 7/30/90/120-day report the Admin can open, including daily Usage Time, blocked time, Allowance, and Foreground App statistics. Visible but disabled while offline. The Client requests a 30-minute Report Link over its authenticated socket and opens it in the default browser; the link grants read-only access to that Client and period only.
 - **Popups** (warnings and messages) appear **top-center** of the primary screen — big centered title,
   readable body, an ✕ plus an OK button — as topmost, **non-activating** toasts that never steal focus
   from a game. Positioned in device pixels (DPI-correct), so nothing runs off the edge. **Warnings**
@@ -224,7 +226,7 @@ by the parent (`winget install Microsoft.DotNet.DesktopRuntime.10`).
   (the point is that it was seen) and are logged `message-shown` when shown. No reply.
 
 ### 6.3 Foreground App sampling
-Once per minute, record the foreground application's **product/exe name only** (e.g. "Minecraft"). Never window titles, URLs, or process lists. Rides the Ping; feeds the per-app charts on both the Client Page and the Flyout.
+Once per minute, record the foreground application's **product/exe name only** (e.g. "Minecraft"). Never window titles, URLs, or process lists. Rides the Ping; feeds the per-app statistics on the Client Page and Usage Report.
 
 ### 6.4 Offline behaviour
 - Settings (Allowance, Downtime) are cached locally on every sync; enforcement never needs the server.
@@ -265,8 +267,8 @@ ordering, and the `update-installed {from, to}` log only — not for the decisio
 
 - **Pairing:** one HTTPS POST (server URL + Family Code + PC name → Client Token or rejection).
 - **Everything else:** one WebSocket per client, Client Token presented at connect, automatic reconnect with backoff. Being connected is being online; liveness via protocol ping/pong.
-  - **Client → server:** minutely status snapshot (status: active/locked/blocked/grant-active, remaining minutes, version, foreground app), Event batches (incl. offline backlog).
-  - **Server → client:** settings update, Adjustment, message, remote kill, update-available (version + hash + URL), rotated Family Code secret.
+  - **Client → server:** minutely status snapshot (status: active/locked/blocked/grant-active, remaining minutes, version, foreground app), Event batches (incl. offline backlog), Report Link requests.
+  - **Server → client:** settings update, Adjustment, message, remote kill, update-available (version + hash + URL), rotated Family Code secret, Report Links.
 
 ## 8. Development workflow
 

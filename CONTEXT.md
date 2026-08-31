@@ -36,7 +36,7 @@ The household's second secret, and the key behind every [[Extra Time Code]]. Unl
 _Avoid_: grant key, grant secret (pick one term)
 
 **Foreground App**:
-The product name of the application in the foreground (e.g. "Minecraft"), sampled with each Ping — never window titles, URLs, or background process lists. Feeds the per-app daily usage chart shown identically on the Client Page and the Flyout: a shared statistic, not surveillance.
+The product name of the application in the foreground (e.g. "Minecraft"), sampled with each Ping — never window titles, URLs, or background process lists. Feeds the per-app usage statistics shown in the Client Page and Usage Report: a shared statistic, not surveillance.
 
 It also shows on the parent's side as what the Client is in *right now*, on the Clients grid and the Client Page. That readout is only ever the last Ping's value while the Client is online: the kid is looking at their own foreground already, so the parent seeing it too is a difference of timeliness, not of knowledge. There is no Foreground App while a Client is locked, blocked, or offline — the Client sends none, and the parent's side shows none rather than the last one it saw. A stale app name would be a claim about now that nothing supports.
 _Avoid_: app title, process list; current app (it is the same term whether read live or in aggregate)
@@ -93,6 +93,14 @@ _Avoid_: unpaired (that is one cause of it, not the state)
 **Client Page**:
 The per-Client view in the admin UI: timeline of Pings colored by Events, current status and version, remaining time today, settings, and message/Adjustment controls.
 _Avoid_: dashboard (ambiguous)
+
+**Usage Report**:
+A read-only view of one Client's Usage Time over a chosen server-calendar reporting period, showing the same daily totals, blocked time, Allowance, and Foreground App breakdown whether opened by the Admin or by someone at that Client. Its daily average covers every calendar day in the period, including days with no recorded usage; on a shared Client it describes the machine's combined usage, not one person's activity.
+_Avoid_: client report (a Client is the machine, not the audience), user report
+
+**Report Link**:
+A temporary link issued at a paired Client that lets anyone holding it open that Client's Usage Report for one fixed reporting period. It may be reopened for 30 minutes after issue, alongside any other Report Links; it grants no other access and never replaces an Admin session. Revoking, re-Pairing, or deleting the Client invalidates its Report Links, while pausing enforcement does not.
+_Avoid_: report hash, public report
 
 **Flyout**:
 The kid-facing view on the Client itself (from the tray icon): remaining time today and next Downtime. The kid sees their own data — transparency cuts both ways.
@@ -203,6 +211,7 @@ exactly one Hungarian equivalent, fixed here and used everywhere.
 | Alert | értesítés |
 | Alert Device | értesítési eszköz |
 | Install Kit | telepítőcsomag |
+| Usage Report | használati jelentés |
 
 Only terms that reach a screen appear here. The [[Grant Seed]] is deliberately absent: it is never shown
 to anyone in either language, and a translation for a string that cannot be rendered is one more thing to

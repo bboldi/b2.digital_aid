@@ -181,6 +181,18 @@ export default async function wsRoutes(app) {
           }
           break;
         }
+        case 'report-link-request': {
+          const requestId = typeof msg.requestId === 'string' && msg.requestId.length <= 100
+            ? msg.requestId : '';
+          const link = requestId
+            ? app.reportLinks.issue(client.id, Number(msg.days), client.token_hash)
+            : null;
+          socket.send(JSON.stringify({
+            type: 'report-link', requestId,
+            path: link?.path ?? null,
+          }));
+          break;
+        }
         default:
           app.log.warn({ client: client.id, type: msg.type }, 'unknown ws message');
       }

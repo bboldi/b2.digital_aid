@@ -63,6 +63,11 @@ public class ProtocolTests
             """{"type":"update","version":"0.2.0","sha256":"9f86d081","path":"/api/update/0.2.0"}"""));
         Assert.Equal(("0.2.0", "9f86d081", "/api/update/0.2.0"),
             (update.Update.Version, update.Update.Sha256, update.Update.Path));
+
+        var report = Assert.IsType<ServerMessage.ReportLink>(ServerMessageParser.Parse(
+            """{"type":"report-link","requestId":"req-42","path":"/clients/3/report?days=30#token=abc"}"""));
+        Assert.Equal(("req-42", "/clients/3/report?days=30#token=abc"),
+            (report.RequestId, report.Path));
     }
 
     [Theory]
@@ -157,6 +162,16 @@ public class ProtocolTests
         Assert.Equal("482913", json["code"]!.GetValue<string>());
         Assert.Equal("KIDS-PC", json["name"]!.GetValue<string>());
         Assert.Equal(Protocol.Version, json["protocol"]!.GetValue<int>());
+    }
+
+    [Fact]
+    public void Report_link_request_carries_the_period_and_correlation_id()
+    {
+        var json = JsonNode.Parse(ClientMessages.ReportLink("req-42", 90))!.AsObject();
+
+        Assert.Equal("report-link-request", json["type"]!.GetValue<string>());
+        Assert.Equal("req-42", json["requestId"]!.GetValue<string>());
+        Assert.Equal(90, json["days"]!.GetValue<int>());
     }
 
     [Fact]

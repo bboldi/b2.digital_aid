@@ -21,6 +21,9 @@ import { dailyData, USED_TODAY_MINUTES } from '../daily.js';
 import { decide, lapseExpired, markDelivered, MAX_ASK_MINUTES } from '../requests.js';
 import { verdictMessage } from '../ws.js';
 import { latestKit } from '../install-kit.js';
+import {
+  REPORT_DAYS, reportCookieName, reportCookiePath,
+} from '../report-links.js';
 
 // Shorthand for the language this request resolved to. The preHandler already worked it out and
 // hung it on the request, so routes never repeat that decision.
@@ -382,17 +385,54 @@ export default async function adminRoutes(app) {
     return reply.redirect(`/clients/${id}`);
   });
 
+  const reportHeaders = (reply) => reply
+    .header('Cache-Control', 'no-store')
+    .header('Referrer-Policy', 'no-referrer');
+
+  const deniedReport = (req, reply) => reportHeaders(reply).code(403).view('report-denied.ejs', {
+    fragment: true,
+    title: T(req, 'report.invalidTitle'),
+    message: T(req, 'report.invalidLink'),
+  });
+
+  app.post('/clients/:id/report/access', (req, reply) => {
+    const clientId = Number(req.params.id);
+    const days = Number(req.query.days);
+    const link = app.reportLinks.validate(req.body?.token, clientId, days);
+    if (!link) return deniedReport(req, reply);
+
+    const maxAge = Math.max(1, Math.floor(link.remainingMs / 1000));
+    reply.setCookie(reportCookieName(clientId, days), req.body.token, {
+      path: reportCookiePath(clientId), httpOnly: true, sameSite: 'strict', secure: 'auto', maxAge,
+    });
+    return reportHeaders(reply).code(303).redirect(`/clients/${clientId}/report?days=${days}`);
+  });
+
   app.get('/clients/:id/report', (req, reply) => {
-    const days = parseInt(req.query.days, 10);
-    if (![7, 30, 90, 120].includes(days)) return reply.code(400).send('Invalid days');
+    const days = Number(req.query.days);
+    const clientId = Number(req.params.id);
+    const admin = app.isLoggedIn(req);
+    const link = REPORT_DAYS.has(days)
+      ? app.reportLinks.validate(req.cookies[reportCookieName(clientId, days)], clientId, days)
+      : null;
+
+    if (!admin && !link) {
+      return reportHeaders(reply).view('report-open.ejs', {
+        fragment: true,
+        title: T(req, 'report.opening'),
+        opening: T(req, 'report.opening'),
+        action: `/clients/${clientId}/report/access?days=${encodeURIComponent(req.query.days ?? '')}`,
+      });
+    }
+    if (!REPORT_DAYS.has(days)) return reportHeaders(reply).code(400).send('Invalid days');
 
     const client = db.prepare(
        `SELECT c.*, s.weekday_minutes, s.weekend_minutes 
         FROM clients c 
         LEFT JOIN settings s ON s.client_id = c.id 
         WHERE c.id = ?`
-    ).get(req.params.id);
-    if (!client) return reply.code(404).send('No such client');
+    ).get(clientId);
+    if (!client) return reportHeaders(reply).code(404).send('No such client');
 
     const dates = [];
     for (let i = 0; i < days; i++) {
@@ -427,14 +467,12 @@ export default async function adminRoutes(app) {
     }
 
     let totalUsed = 0;
-    let daysWithData = 0;
     const allApps = new Map();
 
     const dailyStats = dates.map(date => {
        const u = usageMap.get(date);
        if (u.used > 0 || u.blocked > 0) {
            totalUsed += u.used;
-           daysWithData++;
            for (const [app, mins] of Object.entries(u.apps)) {
                allApps.set(app, (allApps.get(app) || 0) + mins);
            }
@@ -442,16 +480,16 @@ export default async function adminRoutes(app) {
        return { date, ...u };
     });
 
-    const averageUsed = daysWithData > 0 ? Math.round(totalUsed / daysWithData) : 0;
+    const averageUsed = Math.round(totalUsed / days);
     const topApps = [...allApps.entries()]
        .sort((a, b) => b[1] - a[1])
        .slice(0, 5)
        .map(([app, mins]) => ({ app, percent: Math.round((mins / totalUsed) * 100) }));
 
-    return reply.view('report.ejs', {
+    return reportHeaders(reply).view('report.ejs', {
        fragment: true,
        client, days, dates, dailyStats, averageUsed, topApps,
-       T: (k, vars) => translate(req.cookies.lang || 'en', k, vars),
+       T: (k, vars) => translate(req.lang, k, vars),
        req
     });
   });

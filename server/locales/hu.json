@@ -450,6 +450,9 @@
   "report.date": "Dátum",
   "report.used": "Használt (perc)",
   "report.blocked": "Zárolt (perc)",
+  "report.opening": "Használati jelentés megnyitása…",
+  "report.invalidTitle": "A jelentéshivatkozás nem érhető el",
+  "report.invalidLink": "Ez a jelentéshivatkozás már nem érvényes. Nyiss új jelentést a gépről.",
   "theme.switchLight": "Váltás világos témára",
   "theme.switchDark": "Váltás sötét témára"
 }

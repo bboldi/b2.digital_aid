@@ -57,6 +57,12 @@
   <data name="TrayEnterCode" xml:space="preserve">
     <value>Extra idő kód megadása…</value>
   </data>
+  <data name="TrayUsageReport" xml:space="preserve">
+    <value>Használati jelentés</value>
+  </data>
+  <data name="TrayReportDays" xml:space="preserve">
+    <value>Elmúlt {0} nap</value>
+  </data>
   <data name="TrayLockScreen" xml:space="preserve">
     <value>Képernyő zárolása</value>
   </data>
@@ -119,6 +125,15 @@
   </data>
   <data name="StatusDisconnected" xml:space="preserve">
     <value> (a szülő lecsatlakoztatta)</value>
+  </data>
+  <data name="ReportUnavailable" xml:space="preserve">
+    <value>Nem sikerült megnyitni a használati jelentést. Próbáld újra, amikor a szerver csatlakoztatva van.</value>
+  </data>
+  <data name="ReportUnsupported" xml:space="preserve">
+    <value>Ez a szerver még nem támogatja a használati jelentéseket.</value>
+  </data>
+  <data name="ReportBrowserFailed" xml:space="preserve">
+    <value>A Windows nem tudta megnyitni a használati jelentést a böngészőben.</value>
   </data>
   <data name="TrayTooltip" xml:space="preserve">
     <value>Digital Aid — {0}{1}</value>

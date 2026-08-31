@@ -450,6 +450,9 @@
   "report.date": "Date",
   "report.used": "Used (m)",
   "report.blocked": "Blocked (m)",
+  "report.opening": "Opening usage report…",
+  "report.invalidTitle": "Report link unavailable",
+  "report.invalidLink": "This Report Link is no longer valid. Open a new report from the Client.",
   "theme.switchLight": "Switch to light theme",
   "theme.switchDark": "Switch to dark theme"
 }

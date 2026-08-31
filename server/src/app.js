@@ -23,6 +23,7 @@ import wsRoutes, { ClientHub } from './ws.js';
 import { startRollupSchedule } from './rollup.js';
 import { startRequestSweep } from './requests.js';
 import { registerAlerts } from './alert-service.js';
+import { ReportLinks } from './report-links.js';
 
 const root = path.dirname(fileURLToPath(import.meta.url));
 
@@ -34,6 +35,7 @@ export function build(opts = {}) {
 
   app.decorate('db', db);
   app.decorate('hub', new ClientHub(db));
+  app.decorate('reportLinks', new ReportLinks(db, opts.reportLinkNow));
   app.decorate('getAdmin', () => db.prepare('SELECT * FROM admin WHERE id = 1').get());
   app.decorate('isLoggedIn', (req) => {
     const admin = app.getAdmin();

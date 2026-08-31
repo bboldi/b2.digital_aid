@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="<%= lang %>">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="referrer" content="no-referrer">
+  <title><%= title %></title>
+</head>
+<body>
+  <p><%= opening %></p>
+  <form method="post" action="<%= action %>">
+    <input type="hidden" name="token">
+  </form>
+  <script>
+    const token = new URLSearchParams(location.hash.slice(1)).get('token') ?? '';
+    history.replaceState(null, '', location.pathname + location.search);
+    document.querySelector('input[name="token"]').value = token;
+    document.querySelector('form').submit();
+  </script>
+</body>
+</html>

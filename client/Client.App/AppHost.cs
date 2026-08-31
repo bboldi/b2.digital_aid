@@ -43,6 +43,7 @@ public sealed class AppHost : IDisposable
 
     private ServerLink? _link;
     private TaskCompletionSource<Core.ServerMessage.CouponStatus>? _couponWait;
+    private readonly Dictionary<string, TaskCompletionSource<Core.ServerMessage.ReportLink>> _reportWaits = [];
     private TimeSpan _lastElapsed;
     private int _secondsSincePing = PingEverySeconds;   // ping immediately on the first tick
     private bool _sessionUnlocked = true;
@@ -460,6 +461,12 @@ public sealed class AppHost : IDisposable
     private void OnConnectionChanged(bool online)
     {
         _online = online;
+        if (!online)
+        {
+            foreach (var (requestId, wait) in _reportWaits)
+                wait.TrySetResult(new Core.ServerMessage.ReportLink(requestId, null));
+            _reportWaits.Clear();
+        }
         var now = DateTimeOffset.Now;
         if (online)
         {
@@ -510,6 +517,10 @@ public sealed class AppHost : IDisposable
         // the waiter wakes — so the entry box and the enforcement state agree the moment it resumes.
         if (message is Core.ServerMessage.CouponStatus couponStatus)
             _couponWait?.TrySetResult(couponStatus);
+
+        if (message is Core.ServerMessage.ReportLink reportLink
+            && _reportWaits.Remove(reportLink.RequestId, out var reportWait))
+            reportWait.TrySetResult(reportLink);
 
         // Backgrounds arrive in hello and again whenever the admin changes one. Both carry the set
         // already resolved for this Client, so there is one path.
@@ -660,6 +671,14 @@ public sealed class AppHost : IDisposable
     {
         var menu = new System.Windows.Forms.ContextMenuStrip();
         menu.Items.Add(Strings.TrayTimeLeft, null, (_, _) => ShowFlyout());
+        var report = new System.Windows.Forms.ToolStripMenuItem(Strings.TrayUsageReport) { Enabled = _online };
+        foreach (var days in new[] { 7, 30, 90, 120 })
+        {
+            var period = days;
+            report.DropDownItems.Add(string.Format(Strings.TrayReportDays, period), null,
+                (_, _) => _ = OpenUsageReportAsync(period));
+        }
+        menu.Items.Add(report);
         menu.Items.Add(Strings.TrayAskForTime, null, (_, _) => PromptAskForTime());
         menu.Items.Add(Strings.TrayEnterCode, null, (_, _) => PromptExtraTimeCode());
         // Stepping away without spending Usage Time. The clock only runs while the session is
@@ -675,6 +694,7 @@ public sealed class AppHost : IDisposable
         // — "is it even trying?"
         menu.Opening += (_, _) =>
         {
+            report.Enabled = _online;
             reconnect.Enabled = !_online;
             reconnect.Text = ReconnectLabel();
         };
@@ -913,6 +933,57 @@ public sealed class AppHost : IDisposable
     {
         var dialog = new ExtraTimeCodeWindow(input => TryRedeem(input, "the tray"), RedeemCouponAsync);
         ShowOverBlockScreen(dialog);
+    }
+
+    private async Task OpenUsageReportAsync(int days)
+    {
+        if (_link is null || !_link.IsConnected)
+        {
+            ShowToast(Strings.AppName, Strings.ReportUnavailable, TimeSpan.FromSeconds(10));
+            return;
+        }
+
+        var requestId = Guid.NewGuid().ToString("N");
+        var wait = new TaskCompletionSource<Core.ServerMessage.ReportLink>(
+            TaskCreationOptions.RunContinuationsAsynchronously);
+        _reportWaits.Add(requestId, wait);
+
+        if (!await _link.TrySendAsync(ClientMessages.ReportLink(requestId, days)))
+        {
+            _reportWaits.Remove(requestId);
+            ShowToast(Strings.AppName, Strings.ReportUnavailable, TimeSpan.FromSeconds(10));
+            return;
+        }
+
+        var answered = await Task.WhenAny(wait.Task, Task.Delay(TimeSpan.FromSeconds(10)));
+        _reportWaits.Remove(requestId);
+        if (answered != wait.Task)
+        {
+            var text = _link.IsConnected ? Strings.ReportUnsupported : Strings.ReportUnavailable;
+            ShowToast(Strings.AppName, text, TimeSpan.FromSeconds(10));
+            return;
+        }
+
+        var path = wait.Task.Result.Path;
+        var state = _agent.State;
+        if (string.IsNullOrEmpty(path) || !path.StartsWith('/') || state.ServerUrl is null)
+        {
+            ShowToast(Strings.AppName, Strings.ReportUnavailable, TimeSpan.FromSeconds(10));
+            return;
+        }
+
+        try
+        {
+            var server = new Uri(state.ServerUrl.TrimEnd('/') + "/");
+            var url = new Uri(server, path.TrimStart('/'));
+            Process.Start(new ProcessStartInfo { FileName = url.AbsoluteUri, UseShellExecute = true });
+        }
+        catch (Exception ex) when (ex is System.ComponentModel.Win32Exception
+                                   or InvalidOperationException or UriFormatException)
+        {
+            Log($"could not open usage report: {ex.Message}");
+            ShowToast(Strings.AppName, Strings.ReportBrowserFailed, TimeSpan.FromSeconds(10));
+        }
     }
 
     private async Task AskAsync(string json)
